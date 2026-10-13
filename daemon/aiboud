@@ -1460,6 +1460,39 @@ def read_dirs():
     return [HOME / ".config", SKILL_DIR, HOME / ".local/bin", REPO, HOME / ".cache/DankMaterialShell"] + \
         [Path(os.path.expanduser(str(x).strip())) for x in extra if str(x).strip()]
 
+
+# read-only commands the desktop help may run by itself (prefixes)
+READ_COMMANDS = [
+    "niri msg -j", "niri validate", "niri --version",
+    "dms version", "dms doctor", "dms ipc --help", "dms keybinds show", "dms plugins list",
+    "dms ipc call settings get", "dms ipc call settings dump", "dms ipc call profiles status",
+    "dms ipc call profiles list", "dms ipc call plugins list", "dms ipc call plugins status",
+    "dms ipc call plugin-scan list", "dms ipc call bar status", "dms ipc call bar getPosition",
+    "dms ipc call theme getMode", "dms ipc call wallpaper get", "dms ipc call desktopWidget list",
+    "termfx status", "termfx state", "termfx doctor", "termfx apps", "termfx shell-apps",
+    "dms-profil list", "dms-thema liste", "sleeptimer status", "sleeptimer state", "videomodus status",
+    "orangedeck-dashtab --check", "kitty-kontrast --pruefen", "pear-glas status", "codium-glas status",
+    "systemctl --user status", "systemctl --user is-active", "systemctl --user list-units",
+    "journalctl --user -u", "journalctl --user -n", "aibou status", "fc-list",
+]
+# never, whatever is proposed (the skill's safety rules, plus the obvious)
+BLOCKED = [
+    (r"\b(sudo|pkexec|doas|su)\b", "needs root rights: run it yourself in a terminal"),
+    (r"orangedeck-dashtab(?![^;&|]*--check)", "rebuilds the DMS overlay and restarts DMS"),
+    (r"dms-leiste-patch|dms-profil-tab|dms-profil-einstellungen|dashtab-hooks\.d", "never run directly (overlay hook)"),
+    (r"\bdms\s+(restart|kill|run|setup|update)\b|\bdms\s+plugins\s+(install|uninstall|update)", "only by hand"),
+    (r"systemctl\s+--user\s+(restart|stop|kill|disable|mask)\s+(dms|niri)", "only by hand"),
+    (r"niri\s+msg\s+action\s+(quit|power-off|focus-|move-.*workspace)", "changes the running session"),
+    (r"\b(reboot|poweroff|shutdown|halt)\b|loginctl\s+(terminate|kill)", "ends the session"),
+    (r"\b(pkill|pgrep|killall)\b|\bkill\s+-9", "processes only by PID, and not from here"),
+    (r"\brm\s+-[a-z]*r|\brm\s+-[a-z]*f", "deletes recursively or without asking"),
+    (r"/usr/(bin|share|local/bin)/|/run/user/\d+/danklinux|\.config/niri/dms/|orangedeck/dms-ui|quickshell/dms-custom", "protected place"),
+    # backups (`<file>.bak-<topic>-YYYYMMDD`) may be made, old ones never run
+    (r"(^|[;&|]\s*)\S*/?\.[\w-]+\.vor-|\bbash\s+\S*\.vor-", "old backup, never run it"),
+    (r"(icon-thema\s+vorher|dms-profil\s+reset|orangedeck-dashtab\s+--remove)", "resets only by hand"),
+]
+ACTION_RX = re.compile(r"```(?:aktion|action)[^\n]*\n(.*?)```", re.S)
+
 DESKTOP = {
     "de": "Du kannst {user} beim Desktop helfen. Lesen darfst du selbst: Dateien und die erlaubten "
           "lesenden Befehle (niri msg -j, dms ipc call … get/status/list, termfx status und ähnliche). "

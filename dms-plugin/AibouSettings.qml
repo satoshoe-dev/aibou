@@ -60,7 +60,7 @@ PluginSettings {
                     ["blush3", "Blushing"], ["grapple", "Grappling gun"], ["banana", "Banana"], ["dock", "In the frame"]]
             Rectangle {
                 required property var modelData
-                width: 92; height: 84; radius: Theme.cornerRadius
+                width: Theme.iconSize * 3.8; height: Theme.iconSize * 3.5; radius: Theme.cornerRadius
                 color: Theme.surfaceContainerHigh
                 Image {
                     x: 2; y: 2; width: parent.width - 4; height: parent.height - 20
@@ -562,7 +562,7 @@ PluginSettings {
                             id: testBtn
                             text: testProc.running ? I18n.trFor("aibou", "Testing …") : I18n.trFor("aibou", "Test")
                             iconName: "network_check"
-                            buttonHeight: 32
+                            buttonHeight: Theme.iconSize + Theme.spacingS
                             onClicked: {
                                 if (testProc.running) return
                                 entry.result = ""

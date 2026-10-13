@@ -29,11 +29,11 @@ PluginComponent {
         return s === "none" ? "kuro" : s;
     }
 
-    // The tile shows the figure itself once DankIcon can draw images
-    // (dms-leiste-patch, section 12); until then a plain symbol.
+    // The tile shows the figure itself where the running DMS's DankIcon can
+    // draw images (a patched DMS); with the stock one a plain symbol.
     FileView {
         id: dankIconSource
-        path: Quickshell.env("HOME") + "/.config/quickshell/dms-custom/DankCommon/Widgets/DankIcon.qml"
+        path: Quickshell.shellDir + "/DankCommon/Widgets/DankIcon.qml"
     }
     readonly property bool imageIcons: dankIconSource.loaded && dankIconSource.text().indexOf("isImage") >= 0
     readonly property string figureIcon: root.imageIcons ? Qt.resolvedUrl("icons/" + root.figure + ".svg").toString() : "mood"
@@ -142,7 +142,7 @@ PluginComponent {
                             required property var modelData
 
                             width: (detailColumn.width - Theme.spacingXS) / 2
-                            height: 44
+                            height: Theme.iconSize + Theme.spacingL + Theme.spacingXS
                             radius: Theme.cornerRadius
                             opacity: root.isOn ? 1 : 0.4
                             color: actionHover.containsMouse && root.isOn ? Theme.surfaceContainerHighest : Theme.surfaceContainer
