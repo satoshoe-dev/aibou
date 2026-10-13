@@ -596,6 +596,27 @@ ShellRoot {
         y: floor - height - inset - c.lift - c.hover + c.sink * (c.bodyH + 14)
     }
 
+    // a short call next to a figure's head, on whichever surface he is
+    // drawn: onTop for the sky (in front, in the air), else the backdrop
+    component ShoutText: Text {
+        required property var c
+        property real floorY: 0
+        property bool onTop: false
+        readonly property bool up: c.place === "sky"
+        readonly property bool here: onTop ? (c.place === "sky" || c.place === "stage") : c.place === "home"
+        visible: c.active && c.shout !== "" && here && !world.fullscreen
+        text: c.shout
+        // hanging: beside his head along the rope; standing: beside his head
+        x: up ? c.x0 - Math.sin(c.theta) * c.bodyH * 0.8 + c.size * 0.55 : c.x0 + c.size * 0.5
+        y: (up ? c.y0 - Math.cos(c.theta) * c.bodyH * 0.8 : floorY - c.lift - c.hover - c.bodyH * 1.1) - height / 2
+        color: world.dark ? "#ffe9a8" : "#5a3d10"
+        style: Text.Outline
+        styleColor: world.dark ? "#1a1412" : "white"
+        font.pixelSize: 15
+        font.bold: true
+        font.italic: true
+    }
+
     // ── home: behind everything ───────────────────────────────────
     // Built anew when another backdrop surface was opened after it and lies
     // over it (AudioFX after a profile switch): the newest lies on top
@@ -645,6 +666,11 @@ ShellRoot {
                     sourceComponent: Creature { st: hl.modelData }
                 }
             }
+            ShoutText { c: c0; floorY: home.floor; z: 4 }
+            ShoutText { c: c1; floorY: home.floor; z: 4 }
+            ShoutText { c: c2; floorY: home.floor; z: 4 }
+            ShoutText { c: c3; floorY: home.floor; z: 4 }
+            ShoutText { c: c4; floorY: home.floor; z: 4 }
             JumpRope { z: -1; front: false; floor: home.floor; where: "home" }
             JumpRope { z: 3; front: true; floor: home.floor; where: "home" }
         }
@@ -1102,21 +1128,12 @@ ShellRoot {
         FloorShadow { c: c2 }
         FloorShadow { c: c3 }
         FloorShadow { c: c4 }
-        // a short call next to his head ("uh uh ah ah!")
-        component Shout: Text {
-            required property var c
-            readonly property bool up: c.place === "sky"
-            visible: c.active && c.shout !== "" && c.place !== "dock" && c.place !== "chat" && !world.fullscreen
-            text: c.shout
-            // hanging: beside his head along the rope; standing: beside his head
-            x: up ? c.x0 - Math.sin(c.theta) * c.bodyH * 0.8 + c.size * 0.55 : c.x0 + c.size * 0.5
-            y: (up ? c.y0 - Math.cos(c.theta) * c.bodyH * 0.8 : world.floorY - c.bodyH * 1.1) - height / 2
-            color: world.dark ? "#ffe9a8" : "#5a3d10"
-            style: Text.Outline
-            styleColor: world.dark ? "#1a1412" : "white"
-            font.pixelSize: 15
-            font.bold: true
-            font.italic: true
+        // a short call next to his head ("uh uh ah ah!"): up here only for
+        // those in front of the windows or in the air; behind the windows the
+        // backdrop draws it (home), so the windows cover it like him
+        component Shout: ShoutText {
+            floorY: world.floorY
+            onTop: true
         }
         Shout { c: c0 }
         Shout { c: c1 }
@@ -1699,6 +1716,8 @@ ShellRoot {
         // for tests: the first figure idle in front of the windows, at once
         function toFront(): void { b0.st.stopAll(); b0.st.place = "stage"; b0.st.y0 = world.floorY; b0.st.sink = 0; b0.doing = "idle"; b0.stageIdle = 0 }
         // for tests: a pointer position (on this screen), as the pointer stream would bring it
+        // for tests: a call from figure i where he is now (aibou shoutTest 0 Hi!)
+        function shoutTest(i: int, text: string): void { shell.brains[i].st.call(text) }
         function fakePointer(x: real, y: real): string {
             for (const b of brains) if (b.st.active) b.pointerMoved(x, y)
             return brains.filter(b => b.st.active).map(b => b.st.name + " " + b.doing + " " + Math.round(b.gripY(0))).join(" | ")
