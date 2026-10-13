@@ -8,11 +8,13 @@ happens on the machine. You can drag them, throw them, tickle them and chat with
 
 *Aibou* (相棒) is Japanese for partner or buddy.
 
-![The eleven figures](docs/figures.png)
+![Seven of them on the frame](docs/demo.gif)
 
 ## Figures
 
 Up to five at a time, each with its own look, habits and voice.
+
+![The eleven figures](docs/figures.png)
 
 | Figure | Looks | Likes |
 |---|---|---|
@@ -169,6 +171,7 @@ On battery (setting "Battery saver") they play less, set off less often and slee
 | DMS plugin | `dms-plugin/`: Control Center tile and settings page |
 | Helper and service | `bin/aibou`, `systemd/aibou.service` |
 | Tile pictures | `shell/thumbs/`, made by `qs -p shell/thumbs.qml` and `tools/thumbs_crop.py` |
+| README animation | `shell/demo.qml`, `tools/demo_gif.sh WALLPAPER` |
 
 ## License
 
