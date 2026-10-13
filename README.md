@@ -62,7 +62,7 @@ Portuguese, Russian and Chinese.
   `inotifywait` from inotify-tools (downloads), `busctl` (notifications), `secret-tool` (API keys
   of other chat providers), `checkupdates` from pacman-contrib (updates on Arch)
 - For the chat: the [Claude Code](https://docs.claude.com/en/docs/claude-code) CLI (`claude`), or
-  an OpenAI-compatible or Anthropic API key set up on the settings page
+  an OpenAI-compatible or Anthropic API key set up on the settings page (kept with `secret-tool`)
 
 ## Install
 
@@ -125,14 +125,17 @@ In the chat window you can type commands without a prefix: `jump`, `dance`, `kis
 `climb arai`, `happy 3`, `more`, `fewer`, `help`. Anything that is not a command goes to the AI.
 Left click a figure to tickle it, double click for the chat, drag to pick it up and throw it.
 
-## Desktop help in the chat
+## Chat and desktop help
 
-With the setting "Desktop help" on, the chat may read your configuration (`~/.config`,
+The chat sends your messages off the machine: to Anthropic through the `claude` CLI, or to the
+provider you set up on the settings page.
+
+"Desktop help" is off by default. Switched on, the chat may read your configuration (`~/.config`,
 `~/.local/bin`, this repository, DMS's cache and the folders under "readDirs") and run a list of
-read-only commands. Changes come as cards with a button; nothing runs until you click it, and a
-block list stops root rights and restarts of DMS or niri regardless of what the model says. If
-you keep a Claude Code skill about your desktop in `~/.claude/skills/desktop` (or set
-`AIBOU_SKILL_DIR`), it is read into the help.
+read-only commands; what it reads goes to the chat provider along with your message. Changes come
+as cards with a button and nothing runs until you click it. A block list stops root rights and
+restarts of DMS or niri regardless of what the model says. If you keep a Claude Code skill about
+your desktop in `~/.claude/skills/desktop` (or set `AIBOU_SKILL_DIR`), it is read into the help.
 
 ## Optional extras
 

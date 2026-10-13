@@ -200,9 +200,6 @@
   "Desktop help": {
     "Desktop help": "Aiuto per il desktop"
   },
-  "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked.": {
-    "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked.": "Nella chat può consultare il desktop (file, comandi di sola lettura come niri msg e dms ipc get) e conosce lo skill desktop. Le modifiche le propone solo come scheda; non viene eseguito nulla finché non fai clic su «Run». Permessi di root, riavvii di DMS o niri e ripristini sono sempre bloccati."
-  },
   "Chat model": {
     "Chat model": "Modello della chat"
   },
@@ -307,5 +304,8 @@
   },
   "In the frame": {
     "In the frame": "Nella cornice"
+  },
+  "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": {
+    "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": "Nella chat può consultare il desktop (file, comandi di sola lettura come niri msg e dms ipc get) e conosce lo skill desktop. Le modifiche le propone solo come scheda; non viene eseguito nulla finché non fai clic su «Run». Permessi di root, riavvii di DMS o niri e ripristini sono sempre bloccati. Ciò che legge viene inviato insieme al tuo messaggio al fornitore della chat."
   }
 }

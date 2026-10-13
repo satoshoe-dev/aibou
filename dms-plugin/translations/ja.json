@@ -200,9 +200,6 @@
   "Desktop help": {
     "Desktop help": "デスクトップのヘルプ"
   },
-  "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked.": {
-    "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked.": "チャットでデスクトップを調べられます（ファイル、niri msg や dms ipc get などの読み取り専用コマンド）。desktop スキルも知っています。変更はカードで提案するだけで、「実行」をクリックするまで何も実行しません。root 権限、DMS や niri の再起動、リセットは常にブロックされます。"
-  },
   "Chat model": {
     "Chat model": "チャットモデル"
   },
@@ -307,5 +304,8 @@
   },
   "In the frame": {
     "In the frame": "フレーム内"
+  },
+  "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": {
+    "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": "チャットでデスクトップを調べられます（ファイル、niri msg や dms ipc get などの読み取り専用コマンド）。desktop スキルも知っています。変更はカードで提案するだけで、「実行」をクリックするまで何も実行しません。root 権限、DMS や niri の再起動、リセットは常にブロックされます。読んだ内容は、メッセージと一緒にチャットのプロバイダーへ送られます。"
   }
 }

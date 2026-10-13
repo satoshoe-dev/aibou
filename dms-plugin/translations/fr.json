@@ -200,9 +200,6 @@
   "Desktop help": {
     "Desktop help": "Aide pour le bureau"
   },
-  "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked.": {
-    "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked.": "Dans le chat, il peut consulter des choses sur le bureau (fichiers, commandes en lecture seule comme niri msg et dms ipc get) et connaît le skill desktop. Les modifications, il ne fait que les proposer sous forme de carte ; rien ne s'exécute avant votre clic sur « Run ». Les droits root, le redémarrage de DMS ou de niri et les réinitialisations sont toujours bloqués."
-  },
   "Chat model": {
     "Chat model": "Modèle de chat"
   },
@@ -307,5 +304,8 @@
   },
   "In the frame": {
     "In the frame": "Dans le cadre"
+  },
+  "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": {
+    "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": "Dans le chat, il peut consulter des choses sur le bureau (fichiers, commandes en lecture seule comme niri msg et dms ipc get) et connaît le skill desktop. Les modifications, il ne fait que les proposer sous forme de carte ; rien ne s'exécute avant votre clic sur « Run ». Les droits root, le redémarrage de DMS ou de niri et les réinitialisations sont toujours bloqués. Ce qu'il lit est envoyé avec votre message au fournisseur du chat."
   }
 }

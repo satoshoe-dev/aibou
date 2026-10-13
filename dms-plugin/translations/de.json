@@ -158,9 +158,6 @@
   "Desktop help": {
     "Desktop help": "Desktop-Hilfe"
   },
-  "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked.": {
-    "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked.": "Im Chat darf er auf dem Desktop nachschauen (Dateien, lesende Befehle wie niri msg und dms ipc get) und kennt den Skill desktop. Änderungen schlägt er nur als Karte vor; ausgeführt wird erst nach deinem Klick auf Ausführen. Root-Rechte, Neustarts von DMS oder niri und Zurücksetzen sind immer gesperrt."
-  },
   "Kuro is a dark glass ball with two long eyes, in the colour of the frame. Mochi is a rice cake with a face, Shiro a light ball with long eyes, Momo a peach, Robo a small robot with glowing eyes, Bao a steamed bun, Neko a cat, Kumo a cloud, Tako an octopus, Hiyoko a chick, Arai a raccoon. All cost the same.": {
     "Kuro is a dark glass ball with two long eyes, in the colour of the frame. Mochi is a rice cake with a face, Shiro a light ball with long eyes, Momo a peach, Robo a small robot with glowing eyes, Bao a steamed bun, Neko a cat, Kumo a cloud, Tako an octopus, Hiyoko a chick, Arai a raccoon. All cost the same.": "Kuro ist eine dunkle Glaskugel mit zwei länglichen Augen, im Farbton des Rahmens. Mochi ist ein Reisküchlein mit Gesicht, Shiro eine helle Kugel mit länglichen Augen, Momo ein Pfirsich, Robo ein kleiner Roboter mit leuchtenden Augen, Bao ein gedämpftes Brötchen, Neko eine Katze, Kumo eine Wolke, Tako ein Oktopus, Hiyoko ein Küken, Arai ein Waschbär. Alle kosten gleich viel."
   },
@@ -307,5 +304,8 @@
   },
   "Aibou itself is not installed: this plugin is only its switch and settings. Install it from github.com/satoshoe-dev/aibou (see the README there).": {
     "Aibou itself is not installed: this plugin is only its switch and settings. Install it from github.com/satoshoe-dev/aibou (see the README there).": "Aibou selbst ist nicht installiert: Dieses Plugin ist nur Schalter und Einstellungen. Installation über github.com/satoshoe-dev/aibou (siehe README dort)."
+  },
+  "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": {
+    "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": "Im Chat darf er auf dem Desktop nachschauen (Dateien, lesende Befehle wie niri msg und dms ipc get) und kennt den Skill desktop. Änderungen schlägt er nur als Karte vor; ausgeführt wird erst nach deinem Klick auf Ausführen. Root-Rechte, Neustarts von DMS oder niri und Zurücksetzen sind immer gesperrt. Was er dabei liest, geht mit deiner Nachricht an den Chat-Anbieter."
   }
 }

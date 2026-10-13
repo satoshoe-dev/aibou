@@ -200,9 +200,6 @@
   "Desktop help": {
     "Desktop help": "Ajuda no desktop"
   },
-  "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked.": {
-    "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked.": "No chat ele pode consultar coisas no desktop (arquivos, comandos só de leitura como niri msg e dms ipc get) e conhece o skill desktop. Alterações ele só propõe como cartão; nada é executado até você clicar em “Run”. Direitos de root, reiniciar o DMS ou o niri e redefinições são sempre bloqueados."
-  },
   "Chat model": {
     "Chat model": "Modelo do chat"
   },
@@ -307,5 +304,8 @@
   },
   "In the frame": {
     "In the frame": "Na moldura"
+  },
+  "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": {
+    "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": "No chat ele pode consultar coisas no desktop (arquivos, comandos só de leitura como niri msg e dms ipc get) e conhece o skill desktop. Alterações ele só propõe como cartão; nada é executado até você clicar em “Run”. Direitos de root, reiniciar o DMS ou o niri e redefinições são sempre bloqueados. O que ele lê vai junto com sua mensagem para o provedor do chat."
   }
 }

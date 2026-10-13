@@ -200,9 +200,6 @@
   "Desktop help": {
     "Desktop help": "Помощь с рабочим столом"
   },
-  "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked.": {
-    "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked.": "В чате фигурка может заглядывать на рабочий стол (файлы, команды только для чтения вроде niri msg и dms ipc get) и знает навык desktop. Изменения она только предлагает карточкой; ничего не выполняется, пока ты не нажмёшь «Run». Права root, перезапуск DMS или niri и сбросы всегда заблокированы."
-  },
   "Chat model": {
     "Chat model": "Модель чата"
   },
@@ -307,5 +304,8 @@
   },
   "In the frame": {
     "In the frame": "В рамке"
+  },
+  "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": {
+    "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": "В чате фигурка может заглядывать на рабочий стол (файлы, команды только для чтения вроде niri msg и dms ipc get) и знает навык desktop. Изменения она только предлагает карточкой; ничего не выполняется, пока ты не нажмёшь «Run». Права root, перезапуск DMS или niri и сбросы всегда заблокированы. То, что она прочитает, уходит вместе с твоим сообщением к провайдеру чата."
   }
 }

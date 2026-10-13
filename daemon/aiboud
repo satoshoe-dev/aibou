@@ -369,17 +369,16 @@ async def crashes():
 RECORDERS = ("wf-recorder", "obs", "gpu-screen-recorder", "kooha", "wl-screenrec", "simplescreenrecorder")
 
 
+CASTS = [[]]                # niri's casts, from its event stream (CastsChanged)
+CASTS_CHANGED = asyncio.Event()
+
+
 def recording_now():
     """Who records the screen: a cast in niri (screen sharing, portal
     recorders) or a known recording program; "" when nobody."""
-    try:
-        r = subprocess.run(["niri", "msg", "-j", "casts"], capture_output=True, text=True, timeout=5)
-        casts = json.loads(r.stdout or "[]")
-        if casts:
-            c = casts[0] if isinstance(casts, list) else {}
-            return str((c or {}).get("app_id") or (c or {}).get("name") or "cast")
-    except (OSError, subprocess.SubprocessError, ValueError):
-        pass
+    if CASTS[0]:
+        c = CASTS[0][0] if isinstance(CASTS[0], list) else {}
+        return str((c or {}).get("app_id") or (c or {}).get("name") or "cast")
     try:
         for d in Path("/proc").iterdir():
             if not d.name.isdigit():
@@ -402,7 +401,12 @@ async def recording():
         if bool(now) != bool(was):
             emit({"t": "recording", "on": bool(now), "by": now or was})
         was = now
-        await asyncio.sleep(3)
+        # a cast shows at once; recording programs are looked for every 5 s
+        try:
+            await asyncio.wait_for(CASTS_CHANGED.wait(), 5)
+        except asyncio.TimeoutError:
+            pass
+        CASTS_CHANGED.clear()
 
 
 DOWNLOADS = HOME / "Downloads"
@@ -568,15 +572,30 @@ async def lock_watch():
             return r.stdout.strip() == "yes"
         except (OSError, subprocess.SubprocessError):
             return None
-    was, since = None, time.monotonic()
+    def path():
+        try:
+            r = subprocess.run(["busctl", "--system", "call", "org.freedesktop.login1", "/org/freedesktop/login1",
+                                "org.freedesktop.login1.Manager", "GetSession", "s", sid],
+                               capture_output=True, text=True, timeout=5)
+            return r.stdout.split('"')[1] if '"' in r.stdout else ""
+        except (OSError, subprocess.SubprocessError):
+            return ""
+    was, since = await asyncio.to_thread(locked), time.monotonic()
+    obj = await asyncio.to_thread(path)
+    # logind signals a change of LockedHint; asked again only then (and when
+    # the monitor ends, after a pause)
     while True:
-        now = await asyncio.to_thread(locked)
-        if now is not None and was is not None and now != was:
-            emit({"t": "locked", "on": now, "away": round(time.monotonic() - since)})
-            since = time.monotonic()
-        if now is not None:
-            was = now
-        await asyncio.sleep(3)
+        if obj:
+            async for line in lines("gdbus", "monitor", "--system", "--dest", "org.freedesktop.login1", "--object-path", obj):
+                if "LockedHint" not in line:
+                    continue
+                now = await asyncio.to_thread(locked)
+                if now is not None and was is not None and now != was:
+                    emit({"t": "locked", "on": now, "away": round(time.monotonic() - since)})
+                    since = time.monotonic()
+                if now is not None:
+                    was = now
+        await asyncio.sleep(30)
 
 
 async def usb_watch():
@@ -623,14 +642,22 @@ def mic_users():
 
 async def mic_watch():
     was = False
-    while True:
+    async def check():
+        nonlocal was
         users = await asyncio.to_thread(mic_users)
         if users is not None:
             on = bool(users)
             if on != was:
                 emit({"t": "mic", "on": on, "by": users[0] if users else ""})
             was = on
-        await asyncio.sleep(4)
+    await check()
+    # pactl reports each stream that starts or ends; only then the list is read
+    while True:
+        async for line in lines("pactl", "subscribe"):
+            if "source-output" in line:
+                await asyncio.sleep(0.3)          # a few events come together
+                await check()
+        await asyncio.sleep(30)
 
 
 # ── the Kuro wallpaper: dark and light, swapped against the mode ────
@@ -659,7 +686,24 @@ async def kuro_wall():
         return
     seen = (None, None)
     sent = None
+    # DMS writes these when the wallpaper or the mode changes: asked only then,
+    # and once a minute in case
+    marks = [HOME / ".local/state/DankMaterialShell/session.json", HOME / ".cache/DankMaterialShell/dms-colors.json"]
+    def stamp():
+        out = []
+        for m in marks:
+            try:
+                out.append(m.stat().st_mtime)
+            except OSError:
+                out.append(None)
+        return out
+    last, asked = None, 0.0
     while True:
+        st = stamp()
+        if st == last and time.monotonic() - asked < 60:
+            await asyncio.sleep(2)
+            continue
+        last, asked = st, time.monotonic()
         path = await asyncio.to_thread(wallpaper)
         try:
             mtime = Path(path).stat().st_mtime if path else None
@@ -684,6 +728,7 @@ async def kuro_wall():
                 await asyncio.to_thread(subprocess.run, ["dms", "ipc", "call", "wallpaper", "set", str(KURO_WALLS[want])],
                                         capture_output=True, timeout=10)
                 await asyncio.sleep(1)
+                last = None
                 continue
         state = (bool(variant), light)
         if state != sent:
@@ -698,7 +743,7 @@ async def backdrop_order():
     profile switch), the scene builds its own again, at most every 15 s."""
     last = -1e9
     while True:
-        await asyncio.sleep(3)
+        await asyncio.sleep(10)
         try:
             r = await asyncio.to_thread(subprocess.run, ["niri", "msg", "-j", "layers"],
                                         capture_output=True, text=True, timeout=5)
@@ -753,7 +798,7 @@ async def failed_units():
         return out
     seen = await asyncio.to_thread(failed)
     while True:
-        await asyncio.sleep(20)
+        await asyncio.sleep(60)
         now = await asyncio.to_thread(failed)
         for unit in sorted(now - seen):
             emit({"t": "trouble", "kind": "unit", "name": re.sub(r"\.service$", "", unit)})
@@ -853,12 +898,35 @@ monstercat=0
 """
 
 
+PLAYERS = {}                # player -> status, from `playerctl --follow`
+
+
 def playing():
+    return "Playing" in PLAYERS.values()
+
+
+def all_players():
     try:
-        r = subprocess.run(["playerctl", "-a", "status"], capture_output=True, text=True, timeout=5)
-        return "Playing" in r.stdout.split()
-    except (OSError, subprocess.SubprocessError):
-        return False
+        r = subprocess.run(["playerctl", "-a", "--format", "{{playerName}}\t{{status}}", "status"],
+                           capture_output=True, text=True, timeout=5)
+        return dict(l.split("\t", 1) for l in r.stdout.splitlines() if "\t" in l)
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return {}
+
+
+async def follow_players():
+    """playerctl prints a line whenever a player's status changes."""
+    while True:
+        async for line in lines("playerctl", "-a", "--follow", "--format", "{{playerName}}\t{{status}}", "status"):
+            name, _, status = line.partition("\t")
+            if status:
+                PLAYERS[name] = status
+            else:
+                # a player went away: who is left is asked once
+                PLAYERS.clear()
+                PLAYERS.update(await asyncio.to_thread(all_players))
+        PLAYERS.clear()
+        await asyncio.sleep(10)
 
 
 class BeatTracker:
@@ -1109,7 +1177,9 @@ class FrameHost:
         """After a DMS restart the domes are sent again (DMS forgot them)."""
         pid, last_ping = None, 0.0
         while True:
-            now_pid = await asyncio.to_thread(self.dms_pid)
+            # the known DMS process still there: no need to ask systemd
+            alive = bool(pid) and Path(f"/proc/{pid}").exists()
+            now_pid = pid if alive else await asyncio.to_thread(self.dms_pid)
             restarted = pid is not None and now_pid != pid
             pid = now_pid
             if restarted or time.monotonic() - last_ping > 30:
@@ -1199,6 +1269,11 @@ class Layout:
         self.dirty = False
         self.sent = None
         self.patched = False
+        self.wake = asyncio.Event()
+
+    def mark(self):
+        self.dirty = True
+        self.wake.set()
 
     def fullscreen(self):
         """A window on an active workspace as big as the screen (niri has no
@@ -1234,8 +1309,10 @@ class Layout:
         return out, self.patched or not missing
 
     async def flush(self):
-        # at most 30 updates a second, scrolling sends one per frame
+        # woken by mark(); at most 30 updates a second while scrolling
         while True:
+            await self.wake.wait()
+            self.wake.clear()
             if self.dirty:
                 self.dirty = False
                 lst, known = self.visible()
@@ -1276,15 +1353,18 @@ async def niri_events():
             except ValueError:
                 continue
             (kind, data), = ev.items()
-            if kind == "WindowsChanged":
+            if kind == "CastsChanged":
+                CASTS[0] = (ev[kind] or {}).get("casts") or []
+                CASTS_CHANGED.set()
+            elif kind == "WindowsChanged":
                 windows.clear()
                 windows.update({w["id"]: w for w in data["windows"]})
-                layout.dirty = True
+                layout.mark()
             elif kind == "WindowOpenedOrChanged":
                 w = data["window"]
                 was = windows.get(w["id"], {}).get("is_focused")
                 windows[w["id"]] = w
-                layout.dirty = True
+                layout.mark()
                 if w.get("is_focused") and not was:
                     activity.poke()
                     emit({"t": "focus", "id": w["id"], "app": w.get("app_id"), "title": w.get("title")})
@@ -1292,17 +1372,17 @@ async def niri_events():
                 for wid, lay in data.get("changes", []):
                     if wid in windows:
                         windows[wid]["layout"] = lay
-                layout.dirty = True
+                layout.mark()
             elif kind == "WindowFocusChanged":
                 activity.poke()
                 w = windows.get(data.get("id")) or {}
                 emit({"t": "focus", "id": data.get("id"), "app": w.get("app_id"), "title": w.get("title")})
             elif kind == "WindowClosed":
                 windows.pop(data.get("id"), None)
-                layout.dirty = True
+                layout.mark()
             elif kind == "WorkspacesChanged":
                 layout.workspaces = {ws["id"]: ws for ws in data["workspaces"]}
-                layout.dirty = True
+                layout.mark()
                 activity.poke()
             elif kind == "WorkspaceActivated":
                 wid = data.get("id")
@@ -1310,7 +1390,7 @@ async def niri_events():
                 for ws in layout.workspaces.values():
                     if ws.get("output") == out:
                         ws["is_active"] = ws["id"] == wid
-                layout.dirty = True
+                layout.mark()
                 activity.poke()
             elif kind == "OverviewOpenedOrClosed":
                 emit({"t": "overview", "open": data.get("is_open", False)})
@@ -1651,7 +1731,8 @@ class Chat:
         model = self.model_override or SETTINGS.get("model") or os.environ.get("AIBOU_MODEL", "haiku")
         skin = SETTINGS.get("skin1") or "kuro"
         lang = language() if language() in ("de", "ja") else "en"
-        desktop = SETTINGS.get("desktopHelp", True) is not False
+        # off unless switched on: it may send file contents to the chat provider
+        desktop = SETTINGS.get("desktopHelp", False) is True
         return (model, skin if skin in FIGURES else "kuro", lang, desktop)
 
     async def stop(self):
@@ -2295,10 +2376,10 @@ async def main():
     emit({"t": "hello", "lang": language()})
     # what was said before the restart; results of actions stay out of sight
     emit({"t": "history", "list": [{"who": "me" if r == "user" else "him", "text": t}
-                                   for r, t in chat.shown() if not t.startswith(("[Ergebnis]", "[Result]"))]})
+                                   for r, t in chat.shown() if not t.startswith(("[Ergebnis]", "[Result]", "[結果]"))]})
     await asyncio.gather(read_commands(), *(kept(f) for f in (
         watch_files, watch_settings, pointer_stream, niri_events, layout.flush, notifications,
-        load_watch, crashes, failed_units, music, frame_host.watch,
+        load_watch, crashes, failed_units, follow_players, music, frame_host.watch,
         recording, downloads, battery, updates, long_jobs, lock_watch, usb_watch, dms_errors, mic_watch, kuro_wall, backdrop_order)))
 
 
