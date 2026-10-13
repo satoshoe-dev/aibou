@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Kuro as a wallpaper: a white ring (his outline) with his two long eyes on
 black, blinking now and then and glancing aside; and the same inverted for
-light mode. Renders a seamless 12 s loop (30 fps) as MP4 and a still PNG.
+light mode. Renders a 12 s loop (30 fps) that repeats without a jump as MP4, and a still PNG.
 
     python3 tools/kuro_wallpaper.py [WIDTH HEIGHT]     (default 2560 1600)
 
