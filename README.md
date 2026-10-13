@@ -59,8 +59,9 @@ Portuguese, Russian and Chinese.
 - Quickshell 0.3 (the one DMS runs on), Qt 6
 - Python 3
 - For some features: `playerctl` and `cava` (dancing), `grim` (finding a free spot in the bar),
-  `inotifywait` from inotify-tools (downloads), `busctl` (notifications), `secret-tool` (API keys
-  of other chat providers), `checkupdates` from pacman-contrib (updates on Arch)
+  `inotifywait` from inotify-tools (downloads), `busctl` (notifications), `gdbus` (lock screen),
+  `pactl` (microphone), `secret-tool` (API keys of other chat providers), `checkupdates` from
+  pacman-contrib (updates on Arch)
 - For the chat: the [Claude Code](https://docs.claude.com/en/docs/claude-code) CLI (`claude`), or
   an OpenAI-compatible or Anthropic API key set up on the settings page (kept with `secret-tool`)
 
