@@ -49,7 +49,8 @@ Traits and lines per figure live in [`shell/Persona.js`](shell/Persona.js).
 - Chat in a small window that grows out of the figure (Claude by default, other providers
   possible). The chat doubles as a command line for the figures and as a small shell (`!command`).
 
-Everything follows the DMS colours, frame and language (English and German).
+Everything follows the DMS colours, frame and language. The figures speak English and German;
+the settings page also comes in Spanish, French, Italian, Portuguese, Russian, Japanese and Chinese.
 
 ## Requirements
 
