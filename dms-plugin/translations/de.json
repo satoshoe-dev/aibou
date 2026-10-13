@@ -307,5 +307,8 @@
   },
   "First name": {
     "First name": "Vorname"
+  },
+  "Aibou itself is not installed: this plugin is only its switch and settings. Install it from github.com/satoshoe-dev/aibou (see the README there).": {
+    "Aibou itself is not installed: this plugin is only its switch and settings. Install it from github.com/satoshoe-dev/aibou (see the README there).": "Aibou selbst ist nicht installiert: Dieses Plugin ist nur Schalter und Einstellungen. Installation über github.com/satoshoe-dev/aibou (siehe README dort)."
   }
 }

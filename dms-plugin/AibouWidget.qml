@@ -7,11 +7,11 @@ import qs.Widgets
 import qs.Modules.Plugins
 
 // Control Center tile for Aibou. Aibou itself runs as its own Quickshell
-// instance (aibou.service); this tile only calls the helper ~/.local/bin/aibou.
+// instance (aibou.service); this tile only calls its helper `aibou`.
 PluginComponent {
     id: root
 
-    readonly property string cli: "\"$HOME/.local/bin/aibou\""
+    readonly property string cli: "\"$(command -v aibou || echo \"$HOME/.local/bin/aibou\")\""
 
     // "on", "off" or "" while unknown
     property string aibouState: ""

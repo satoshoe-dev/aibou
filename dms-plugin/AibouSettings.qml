@@ -10,6 +10,15 @@ import qs.Modules.Plugins
 
 PluginSettings {
     id: root
+
+    // where Aibou itself lives: found over its helper `aibou` (a link into
+    // the repository), so this page works however the plugin was installed
+    property string repoDir: ""
+    property Process repoProc: Process {
+        running: true
+        command: ["sh", "-c", "p=$(command -v aibou || echo \"$HOME/.local/bin/aibou\"); [ -e \"$p\" ] && dirname \"$(dirname \"$(readlink -f \"$p\")\")\""]
+        stdout: StdioCollector { onStreamFinished: root.repoDir = text.trim() }
+    }
     pluginId: "aibou"
 
     readonly property var skinOptions: [
@@ -34,7 +43,7 @@ PluginSettings {
 
     readonly property var extraSkinOptions: [{ label: I18n.trFor("aibou", "None"), value: "none" }].concat(skinOptions)
 
-    // a row of pictures of the chosen figure (made by shell/thumbs.qml; thumbs/ here links to shell/thumbs)
+    // a row of pictures of the chosen figure (made by shell/thumbs.qml in Aibou's repository)
     component Preview: Flow {
         id: pv
         property string key: "skin1"
@@ -42,8 +51,8 @@ PluginSettings {
             SettingsData.pluginSettings;
             return String(SettingsData.getPluginSetting("aibou", key, key === "skin1" ? "kuro" : "none"));
         }
-        readonly property string dir: Qt.resolvedUrl("thumbs/" + skin + "/").toString()
-        visible: skin !== "none" && skin !== ""
+        readonly property string dir: root.repoDir ? "file://" + root.repoDir + "/shell/thumbs/" + skin + "/" : ""
+        visible: skin !== "none" && skin !== "" && dir !== ""
         width: parent ? parent.width : 400
         spacing: Theme.spacingS
         Repeater {
@@ -94,6 +103,16 @@ PluginSettings {
         text: I18n.trFor("aibou", "Shortcuts: Mod+Alt+M bring to front, Mod+Alt+C chat window, Mod+Alt+Z sleep or wake, Mod+Alt+B ball, Mod+Alt+Shift+M on or off.")
         font.pixelSize: Theme.fontSizeSmall
         color: Theme.surfaceVariantText
+        wrapMode: Text.WordWrap
+    }
+
+    StyledText {
+        visible: root.repoDir === ""
+        width: parent ? parent.width : implicitWidth
+        bottomPadding: Theme.spacingM
+        text: I18n.trFor("aibou", "Aibou itself is not installed: this plugin is only its switch and settings. Install it from github.com/satoshoe-dev/aibou (see the README there).")
+        font.pixelSize: Theme.fontSizeSmall
+        color: Theme.error
         wrapMode: Text.WordWrap
     }
 
@@ -567,9 +586,7 @@ PluginSettings {
                 property bool ok: false
                 Process {
                     id: testProc
-                    // the plugin folder is a link into Aibou's repository; aiboud lies beside it
-                    command: ["sh", "-c", "exec \"$(readlink -f \"$1\")/../daemon/aiboud\" --test-provider \"$2\"", "sh",
-                              Qt.resolvedUrl(".").toString().replace("file://", ""), entry.modelData.id]
+                    command: ["sh", "-c", "exec \"$1/daemon/aiboud\" --test-provider \"$2\"", "sh", root.repoDir, entry.modelData.id]
                     stdout: StdioCollector {
                         id: testOut
                         onStreamFinished: {
