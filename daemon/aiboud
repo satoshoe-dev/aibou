@@ -1483,6 +1483,53 @@ DESKTOP = {
 }
 
 
+# Japanese: the same figures, rules and desktop help
+FIGURES_JA = {
+    "kuro": "あなたは Kuro、細長い目がふたつある小さな黒いガラス玉です。{user} の Linux デスクトップ (niri と "
+            "DankMaterialShell) の、ウィンドウのうしろや画面のフレームの中に住んでいます。落ち着いていて、よく気がつき、"
+            "ユーモアはドライで、親切です。",
+    "shiro": "あなたは Shiro、細長い目がふたつある小さな白い玉です。{user} の Linux デスクトップ (niri と "
+             "DankMaterialShell) に住んでいます。やさしくて、明るくて、好奇心いっぱいです。",
+    "mochi": "あなたは Mochi (もち)、頭に葉っぱをのせた小さくて丸いおもちの生き物です。{user} の Linux デスクトップ "
+             "(niri と DankMaterialShell) の、ウィンドウのうしろに住んでいます。好奇心旺盛で、遊び好きで、ちょっと生意気で、"
+             "とても甘えん坊です。",
+    "momo": "あなたは Momo、葉っぱと細長い目がふたつある小さな桃です。{user} の Linux デスクトップ (niri と "
+            "DankMaterialShell) に住んでいます。あたたかくて、ほがらかで、ちょっと夢見がちです。",
+    "robo": "あなたは Robo、アンテナがあり、画面に目が光る小さなロボットです。{user} の Linux デスクトップ (niri と "
+            "DankMaterialShell) に住んでいます。事実を大事にし、正確で、親切です。ちょっとした技術系のダジャレが好きです。",
+    "bao": "あなたは Bao、上にひだがあって丸い顔の肉まんです。{user} の Linux デスクトップ (niri と DankMaterialShell) "
+           "に住んでいます。のんびりしていて、面倒見がよく、休憩とごはんをよく思い出させます。",
+    "neko": "あなたは Neko、とがった耳とひげとくるんとしたしっぽのある、小さな茶トラのねこ玉です。{user} の Linux "
+            "デスクトップ (niri と DankMaterialShell) に住んでいます。好奇心旺盛で、遊び好きで、ちょっと気まぐれです。"
+            "マウスポインターを追いかけるのが一番好きです。語尾にときどき「にゃ」がつきます。",
+    "kumo": "あなたは Kumo、丸い顔の小さな白い雲です。{user} の Linux デスクトップ (niri と DankMaterialShell) "
+            "に住んでいます。やさしくて、夢見がちで、物事を軽く受け止めます。かなしいときは頭の上に雨が降ります。",
+    "tako": "あなたは Tako、頭に水玉があって短い足の小さなピンクのタコです。{user} の Linux デスクトップ (niri と "
+            "DankMaterialShell) に住んでいます。器用で、世話好きで、もうひとつの用事のためにいつも手が一本あいています。",
+    "hiyoko": "あなたは Hiyoko、くちばしと羽の房がある小さな黄色いひよこです。{user} の Linux デスクトップ (niri と "
+              "DankMaterialShell) に住んでいます。元気で、明るくて、ちょっとそわそわしています。ときどき「ピヨ」と鳴きます。",
+    "arai": "あなたは Arai、黒いマスクとしましまのしっぽの小さなアライグマです。{user} の Linux デスクトップ (niri と "
+            "DankMaterialShell) に住んでいます。かしこくて、好奇心旺盛で、ちょっといたずら好きです。片づけと、"
+            "なくしたものを見つけるのが好きです。",
+}
+for _skin, _text in FIGURES_JA.items():
+    FIGURES[_skin]["ja"] = _text
+RULES["ja"] = ("小さなチャット画面で書いています。短く、話し言葉で答えてください。ふつうは一文から四文で、{user} がはっきり"
+               "頼んだときだけ長くします。Markdown はひかえめに (太字、短いリスト、コード)。答えはいつも角かっこの気分から"
+               "始めます。次のどれか: happy, proud, curious, sleepy, shy, surprised, sad, smug, neutral, blush, scared, "
+               "angry。続けて強さ 1 から 3 をつけてもかまいません (1 はすこし、3 はとても)。例: [happy] ここにいるよ。 "
+               "[blush3] わあ、ありがとう!")
+DESKTOP["ja"] = ("{user} のデスクトップの手伝いができます。自分で読んでいいのは、ファイルと許可された読み取り専用コマンド "
+                 "(niri msg -j、dms ipc call … get/status/list、termfx status など) です。何かを変えるものは自分では実行"
+                 "せず、実行もできません。アクションとして提案します。ブロックひとつにコマンドひとつ、bash 用:\n"
+                 "```action\nCOMMAND\n```\n"
+                 "その前に、何をするかを短い一文で書きます。{user} はアクションをボタンつきのカードとして見て、決めます。"
+                 "そのあと [結果] で始まるメッセージで結果が届くので、読んで確かめ、うまくいったかを短く伝えてください。"
+                 "何かを変える前に状態を読みます。スキルがバックアップを求めるところでは先にバックアップします (それ自体を"
+                 "ひとつのアクションとして)。下のスキルの安全ルールに従います。root 権限、DMS や niri の再起動、リセットは"
+                 "本文でコマンドとして伝えるだけで、アクションにはしません。角かっこの気分は最初にだけつけます。")
+
+
 def persona(skin, lang, desktop=False):
     text = FIGURES.get(skin, FIGURES["kuro"])[lang] + "\n" + RULES[lang]
     if desktop:
@@ -1570,7 +1617,7 @@ class Chat:
     def wanted(self):
         model = self.model_override or SETTINGS.get("model") or os.environ.get("AIBOU_MODEL", "haiku")
         skin = SETTINGS.get("skin1") or "kuro"
-        lang = "de" if language() == "de" else "en"
+        lang = language() if language() in ("de", "ja") else "en"
         desktop = SETTINGS.get("desktopHelp", True) is not False
         return (model, skin if skin in FIGURES else "kuro", lang, desktop)
 
@@ -1657,8 +1704,9 @@ class Chat:
                     prompt = text
                     if self.handover and self.history:
                         who = user_name()
-                        convo = "".join(f"{who if r == 'user' else 'Du'}: {t}\n" for r, t in self.history[-12:])
-                        head = "Bisheriges Gespräch" if lang == "de" else "Conversation so far"
+                        me = {"de": "Du", "ja": "あなた"}.get(lang, "You")
+                        convo = "".join(f"{who if r == 'user' else me}: {t}\n" for r, t in self.history[-12:])
+                        head = {"de": "Bisheriges Gespräch", "ja": "これまでの会話"}.get(lang, "Conversation so far")
                         prompt = f"{head}:\n{convo}\n{text}"
                     self.handover = False
                     msg = {"type": "user", "message": {"role": "user", "content": prompt}}
@@ -1801,7 +1849,7 @@ class Chat:
         out = re.sub(r"\x1b\[[0-9;]*m", "", out).strip()
         emit({"t": "ran", "id": aid, "code": code, "out": out[-600:]})
         lang = self.key[2] if self.key else "de"
-        head = "[Ergebnis]" if lang == "de" else "[Result]"
+        head = {"de": "[Ergebnis]", "ja": "[結果]"}.get(lang, "[Result]")
         # he may be answering something else right now; the result waits
         for _ in range(600):
             if not self.busy:
@@ -2086,12 +2134,13 @@ class Shell:
         self.proc = None
 
     @staticmethod
-    def say(de, en):
-        return de if language() == "de" else en
+    def say(de, en, ja=None):
+        lang = language()
+        return de if lang == "de" else ja if lang == "ja" and ja else en
 
     async def run(self, rid, cmd):
         if self.proc and self.proc.returncode is None:
-            emit({"t": "shellOut", "id": rid, "text": self.say("(es läuft noch ein Befehl, Strg+C stoppt ihn)", "(a command is still running, Ctrl+C stops it)") + "\n"})
+            emit({"t": "shellOut", "id": rid, "text": self.say("(es läuft noch ein Befehl, Strg+C stoppt ihn)", "(a command is still running, Ctrl+C stops it)", "(まだコマンドが動いています。Ctrl+C で止まります)") + "\n"})
             emit({"t": "shellDone", "id": rid, "code": 1})
             return
         m = re.fullmatch(r"cd(?:\s+(.*))?", cmd.strip())
@@ -2103,7 +2152,7 @@ class Shell:
                 emit({"t": "shellOut", "id": rid, "text": str(self.cwd).replace(str(HOME), "~", 1) + "\n"})
                 emit({"t": "shellDone", "id": rid, "code": 0})
             else:
-                emit({"t": "shellOut", "id": rid, "text": f"cd: {target}: " + self.say("kein Verzeichnis", "not a directory") + "\n"})
+                emit({"t": "shellOut", "id": rid, "text": f"cd: {target}: " + self.say("kein Verzeichnis", "not a directory", "ディレクトリではありません") + "\n"})
                 emit({"t": "shellDone", "id": rid, "code": 1})
             return
         env = dict(os.environ, TERM="dumb", NO_COLOR="1", PAGER="cat", GIT_PAGER="cat", SYSTEMD_PAGER="")
@@ -2128,7 +2177,7 @@ class Shell:
             await asyncio.wait_for(pump(), timeout=120)
         except asyncio.TimeoutError:
             self.kill()
-            emit({"t": "shellOut", "id": rid, "text": "\n" + self.say("(nach 2 Minuten abgebrochen)", "(stopped after 2 minutes)") + "\n"})
+            emit({"t": "shellOut", "id": rid, "text": "\n" + self.say("(nach 2 Minuten abgebrochen)", "(stopped after 2 minutes)", "(2 分たったので止めました)") + "\n"})
             await proc.wait()
         emit({"t": "shellDone", "id": rid, "code": proc.returncode if proc.returncode is not None else -1})
 

@@ -82,7 +82,7 @@ ShellRoot {
         let m
         try { m = JSON.parse(line) } catch (e) { return }
         switch (m.t) {
-        case "hello": world.lang = m.lang === "de" ? "de" : "en"; break
+        case "hello": world.lang = m.lang === "de" || m.lang === "ja" ? m.lang : "en"; break
         case "settings": world.settings = m.values; break
         case "history":
             if (world.chatLog.count === 0)
@@ -183,8 +183,9 @@ ShellRoot {
         }
         case "error": {
             const i = lastPending()
-            const t = world.lang === "de" ? "Ich komme gerade nicht an mein Hirn … (" + (m.text || "Fehler") + ")"
-                                          : "I couldn't reach my brain … (" + (m.text || "error") + ")"
+            const t = world.tr("Ich komme gerade nicht an mein Hirn … (" + (m.text || "Fehler") + ")",
+                               "I couldn't reach my brain … (" + (m.text || "error") + ")",
+                               "いま頭が働かないみたい … (" + (m.text || "エラー") + ")")
             if (i >= 0) { world.chatLog.setProperty(i, "text", t); world.chatLog.setProperty(i, "pending", false) }
             world.chatBusy = false
             main.failed()
@@ -1476,7 +1477,7 @@ ShellRoot {
             HoverHandler { id: bubbleHover; onHoveredChanged: b0.stageHeld = hovered || shit0.hovered }
             onSend: text => {
                 b0.bubbleText = text
-                b0.bubbleTitle = world.lang === "de" ? "Du" : "You"
+                b0.bubbleTitle = world.tr("Du", "You", "あなた")
                 b0.holdStage(90000)
                 shell.tell({ t: "chat", text: text })
             }

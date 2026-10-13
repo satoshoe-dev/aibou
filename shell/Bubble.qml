@@ -96,7 +96,7 @@ Item {
                 visible: input.text === "" && !input.activeFocus
                 anchors.verticalCenter: parent.verticalCenter
                 x: 10
-                text: bubble.world.lang === "de" ? "Schreib mir was …" : "Say something …"
+                text: bubble.world.tr("Schreib mir was …", "Say something …", "なにか話して …")
                 color: bubble.world.outline
                 font.pixelSize: 13
             }

@@ -64,6 +64,19 @@ var lines = {
         tako:   { hi: ["Blub, %1!", "An eight-armed hello, %1!"], happy: ["Blub blub!"], scared: ["*Ink!*", "Blub?!"], gotIt: ["Suckered on!"], tickle: ["Hehe, all my arms tickle!"], idle: ["Blub.", "Eight arms, zero worries."] },
         hiyoko: { hi: ["Cheep, %1!", "Cheep cheep, hi %1!"], happy: ["Cheep cheep!"], scared: ["Cheeeep!"], gotIt: ["Cheep! Got you!"], snack: ["Peck peck!", "Seeds!"], tickle: ["Cheepeepeep!"], slip: ["Cheeep!"], idle: ["Cheep?", "Cheep!"] },
         arai:   { hi: ["Hehehe, hi %1!", "Well, %1?"], happy: ["Hehehe!"], scared: ["Eek!"], gotIt: ["Snatched!"], snack: ["Found it, ate it!"], tickle: ["Hehe, not there!"], tidy: ["All tidy!", "Clean again."], idle: ["What's lying there?", "*sniff*"] }
+    },
+    ja: {
+        kuro:   { hi: ["よっ、%1!", "やっほー、%1!"], happy: ["やった!"], gotIt: ["つかまえた!"], idle: ["ふむ~", "ぜんぶ見えてるよ。"] },
+        shiro:  { hi: ["%1、こんにちは~!", "きゃー、%1!"], happy: ["わーい~!", "やったぁ~"], scared: ["きゃっ!"], tickle: ["きゃははっ~"], idle: ["ららら~", "いい感じ~"] },
+        mochi:  { hi: ["もちもち、%1!"], happy: ["もちっ!"], snack: ["おだんご!", "もぐもぐ!"], yawn: ["*ふあぁぁ* … おひるね?"], idle: ["やわらかまるまる~", "えへへ~"] },
+        momo:   { hi: ["%1、こんにちは!"], happy: ["うふふ~"], idle: ["いいお天気~", "ももいろ気分~"] },
+        robo:   { hi: ["コンニチハ、ユニット %1。", "新しい接続: %1。"], happy: ["ヨロコビ: 100 %!"], scared: ["エラー 404!", "警告!"], gotIt: ["目標捕捉。"], snack: ["ごくごく!"], tickle: ["ハハ … センサー過負荷!"], idle: ["ピッ。ポッ。", "システム正常。"] },
+        bao:    { hi: ["%1、ごはん食べた?"], happy: ["おいしい一日!"], snack: ["もぐもぐ!", "んー、肉まん!"], yawn: ["*ふあぁ* … 食べたらねむい。"], idle: ["休憩わすれないでね~", "おなかすいた …"] },
+        neko:   { hi: ["にゃー、%1!", "にゃ~ %1!"], happy: ["にゃ~!"], scared: ["シャーッ!", "ふにゃっ!"], gotIt: ["つかまえたにゃ!"], snack: ["おさかな!", "おさかな、おいしい!"], tickle: ["*ゴロゴロ*", "ごろにゃ~"], slip: ["にゃあぁ!"], yawn: ["*ふあぁ* … ねこのおひるね。"], idle: ["*ぺろぺろ*", "にゃ?", "*ゴロゴロ*"] },
+        kumo:   { hi: ["%1、やっほ~", "ふわふわこんにちは、%1!"], happy: ["ふわっ~!"], scared: ["わっ!"], tickle: ["えへへ、ふわふわがくすぐったい!"], yawn: ["*ふあぁ* … お空でおやすみ。"], idle: ["ふわふわ~", "ふわっ~", "今日はからだが軽い。"] },
+        tako:   { hi: ["ぶくっ、%1!", "八本の手でこんにちは、%1!"], happy: ["ぶくぶく!"], scared: ["*スミ!*", "ぶくっ?!"], gotIt: ["吸いついた!"], tickle: ["えへへ、ぜんぶの手がくすぐったい!"], idle: ["ぶくっ。", "手は八本、なやみはゼロ。"] },
+        hiyoko: { hi: ["ピヨ、%1!", "ピヨピヨ、%1こんにちは!"], happy: ["ピヨピヨ!"], scared: ["ピヨーッ!"], gotIt: ["ピヨ! つかまえた!"], snack: ["つんつん!", "おこめ!"], tickle: ["ピヨピヨピヨッ!"], slip: ["ピヨォッ!"], idle: ["ピヨ?", "ピヨ!"] },
+        arai:   { hi: ["へへへ、やっほー%1!", "おや、%1?"], happy: ["へへへ!"], scared: ["ひゃっ!"], gotIt: ["いただき!"], snack: ["みーつけた、いただきます!"], tickle: ["へへ、そこはだめ!"], tidy: ["おかたづけ完了!", "ピカピカになった。"], idle: ["なにか落ちてる?", "*くんくん*"] }
     }
 }
 

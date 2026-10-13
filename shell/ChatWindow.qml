@@ -34,6 +34,7 @@ PanelWindow {
     }
 
     readonly property bool de: world.lang === "de"
+    function tx(de, en, ja) { return world.tr(de, en, ja) }
     // from fixed sizes: the surface has none yet when it is mapped
     readonly property real floor: implicitHeight - world.insets.bottom
 
@@ -144,16 +145,16 @@ PanelWindow {
     onLegendOpenChanged: actOpen = false
     function actIcon(a) { return ({ minimal: "bedtime", calm: "spa", normal: "sentiment_satisfied", lively: "directions_run", max: "rocket_launch" })[a] || "sentiment_satisfied" }
     function actLabel(a) {
-        const n = ({ minimal: ["Minimal", "Minimal"], calm: ["Ruhig", "Calm"], normal: ["Normal", "Normal"], lively: ["Lebhaft", "Lively"], max: ["Maximal", "Maximal"] })[a] || ["Normal", "Normal"]
-        return win.de ? n[0] : n[1]
+        const n = ({ minimal: ["Minimal", "Minimal", "最小"], calm: ["Ruhig", "Calm", "おだやか"], normal: ["Normal", "Normal", "ふつう"], lively: ["Lebhaft", "Lively", "元気"], max: ["Maximal", "Maximal", "最大"] })[a] || ["Normal", "Normal", "ふつう"]
+        return win.tx(n[0], n[1], n[2])
     }
     function actHint(a) {
-        const n = ({ minimal: ["im Rahmen, schaut nur zu", "in the frame, just watches"],
-                     calm: ["schmilzt schnell ein, selten unterwegs", "melts in soon, rarely about"],
-                     normal: ["mal unterwegs, mal im Rahmen", "now about, now in the frame"],
-                     lively: ["oft unterwegs, schmilzt spät ein", "often about, melts in late"],
-                     max: ["immer unterwegs, ruft Freunde", "always about, calls friends"] })[a] || ["", ""]
-        return win.de ? n[0] : n[1]
+        const n = ({ minimal: ["im Rahmen, schaut nur zu", "in the frame, just watches", "フレームの中で見てるだけ"],
+                     calm: ["schmilzt schnell ein, selten unterwegs", "melts in soon, rarely about", "すぐとけこむ、あまり出歩かない"],
+                     normal: ["mal unterwegs, mal im Rahmen", "now about, now in the frame", "出歩いたり、フレームにいたり"],
+                     lively: ["oft unterwegs, schmilzt spät ein", "often about, melts in late", "よく出歩く、なかなかとけこまない"],
+                     max: ["immer unterwegs, ruft Freunde", "always about, calls friends", "いつも出歩いて、仲間を呼ぶ"] })[a] || ["", "", ""]
+        return win.tx(n[0], n[1], n[2])
     }
     // the card is there while he sits in it or is out of it; the round bump only while he sits
     readonly property bool shown: seated || away
@@ -344,9 +345,9 @@ PanelWindow {
                     font.weight: Font.DemiBold
                 }
                 Text {
-                    text: (win.world.chatBusy ? (win.de ? "denkt nach …" : "thinking …")
-                                              : (win.de ? "hört zu" : "listening"))
-                          + "  ·  " + (win.world.dnd ? (win.de ? "Nicht stören" : "Do not disturb") : win.actLabel(win.world.activity))
+                    text: (win.world.chatBusy ? win.tx("denkt nach …", "thinking …", "考え中 …")
+                                              : win.tx("hört zu", "listening", "聞いてるよ"))
+                          + "  ·  " + (win.world.dnd ? win.tx("Nicht stören", "Do not disturb", "おやすみモード") : win.actLabel(win.world.activity))
                     color: win.world.outline
                     font.pixelSize: 12
                 }
@@ -479,8 +480,9 @@ PanelWindow {
                 width: parent.width - 40
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
-                text: win.de ? "Schreib mir was. Enter schickt, Shift+Enter macht eine neue Zeile, Esc schließt.\nBefehle wie kiss, dance, angry 3 laufen sofort, !befehl in der Shell. help zeigt alle."
-                             : "Write me something. Enter sends, Shift+Enter starts a new line, Esc closes.\nCommands like kiss, angry 3 run right away, !command in a shell. help lists them."
+                text: win.tx("Schreib mir was. Enter schickt, Shift+Enter macht eine neue Zeile, Esc schließt.\nBefehle wie kiss, dance, angry 3 laufen sofort, !befehl in der Shell. help zeigt alle.",
+                             "Write me something. Enter sends, Shift+Enter starts a new line, Esc closes.\nCommands like kiss, angry 3 run right away, !command in a shell. help lists them.",
+                             "なにか書いてね。Enter で送信、Shift+Enter で改行、Esc で閉じる。\nkiss、dance、angry 3 などのコマンドはすぐ動くよ。!コマンド はシェルで。help で一覧。")
                 color: win.world.outline
                 font.pixelSize: 13
             }
@@ -611,12 +613,12 @@ PanelWindow {
                         spacing: 8
                         Text {
                             text: ({
-                                ask: win.de ? "Vorschlag" : "Proposal",
-                                running: win.de ? "läuft …" : "running …",
-                                done: win.de ? "erledigt" : "done",
-                                failed: win.de ? "fehlgeschlagen" : "failed",
-                                declined: win.de ? "abgelehnt" : "declined",
-                                blocked: win.de ? "gesperrt" : "blocked"
+                                ask: win.tx("Vorschlag", "Proposal", "提案"),
+                                running: win.tx("läuft …", "running …", "実行中 …"),
+                                done: win.tx("erledigt", "done", "完了"),
+                                failed: win.tx("fehlgeschlagen", "failed", "失敗"),
+                                declined: win.tx("abgelehnt", "declined", "見送り"),
+                                blocked: win.tx("gesperrt", "blocked", "ブロック")
                             })[row.phase] || ""
                             color: row.phase === "failed" || row.phase === "blocked" ? "#e06c75" : win.world.primary
                             font.pixelSize: 11
@@ -654,7 +656,7 @@ PanelWindow {
                                 Text {
                                     id: runLabel
                                     anchors.centerIn: parent
-                                    text: win.de ? "Ausführen" : "Run"
+                                    text: win.tx("Ausführen", "Run", "実行")
                                     color: win.world.dark ? "#1a1412" : "white"
                                     font.pixelSize: 13
                                     font.weight: Font.DemiBold
@@ -676,7 +678,7 @@ PanelWindow {
                                 Text {
                                     id: noLabel
                                     anchors.centerIn: parent
-                                    text: win.de ? "Lieber nicht" : "Not now"
+                                    text: win.tx("Lieber nicht", "Not now", "やめておく")
                                     color: win.world.bubbleText
                                     font.pixelSize: 13
                                 }
@@ -748,7 +750,7 @@ PanelWindow {
             }
             function moodCommand(m) { return m + (level !== 2 ? " " + level : "") + (actor ? " " + nameOf(actor) : "") }
             function fire(cmd) {
-                if (!cmd) { hint = win.de ? "Zu zweit geht nicht mit „Alle“." : "Pairs do not work with \"all\"."; return }
+                if (!cmd) { hint = win.tx("Zu zweit geht nicht mit „Alle“.", "Pairs do not work with \"all\".", "ふたり用は「みんな」ではできないよ。"); return }
                 win.runLine(cmd)
                 hint = "› " + cmd
             }
@@ -860,7 +862,7 @@ PanelWindow {
                     Flow {
                         width: parent.width
                         spacing: 5
-                        Caption { text: win.de ? "Wer" : "Who"; width: 62 }
+                        Caption { text: win.tx("Wer", "Who", "だれ"); width: 62 }
                         Repeater {
                             model: legend.figs
                             Chip {
@@ -871,14 +873,14 @@ PanelWindow {
                                 onPick: { legend.actor = index === 0 ? "" : modelData; if (legend.partner === modelData) legend.partner = "" }
                             }
                         }
-                        Chip { text: win.de ? "Alle" : "All"; on: legend.actor === "all"; onPick: legend.actor = "all" }
+                        Chip { text: win.tx("Alle", "All", "みんな"); on: legend.actor === "all"; onPick: legend.actor = "all" }
                     }
                     Flow {
                         width: parent.width
                         spacing: 5
                         visible: legend.figs.length > 1
-                        Caption { text: win.de ? "Mit" : "With"; width: 62 }
-                        Chip { text: win.de ? "Nächste" : "Nearest"; on: legend.partner === ""; onPick: legend.partner = "" }
+                        Caption { text: win.tx("Mit", "With", "相手"); width: 62 }
+                        Chip { text: win.tx("Nächste", "Nearest", "近くの子"); on: legend.partner === ""; onPick: legend.partner = "" }
                         Repeater {
                             model: legend.figs
                             Chip {
@@ -894,15 +896,15 @@ PanelWindow {
                     Flow {
                         width: parent.width
                         spacing: 5
-                        Caption { text: win.de ? "Stufe" : "Level"; width: 62 }
+                        Caption { text: win.tx("Stufe", "Level", "レベル"); width: 62 }
                         Repeater {
                             model: [1, 2, 3]
                             Chip {
                                 required property int modelData
-                                text: [win.de ? "leicht" : "a little", win.de ? "normal" : "normal", win.de ? "sehr" : "very"][modelData - 1]
+                                text: [win.tx("leicht", "a little", "すこし"), win.tx("normal", "normal", "ふつう"), win.tx("sehr", "very", "とても")][modelData - 1]
                                 on: legend.level === modelData
                                 onPick: legend.level = modelData
-                                tip: win.de ? "Stärke der Stimmung, für die Stimmungen unten" : "Strength of the mood, for the moods below"
+                                tip: win.tx("Stärke der Stimmung, für die Stimmungen unten", "Strength of the mood, for the moods below", "下の気分の強さ")
                             }
                         }
                     }
@@ -937,7 +939,7 @@ PanelWindow {
                     Column {
                         width: legendCol.width
                         spacing: 4
-                        Caption { text: win.de ? "Stimmung" : "Mood" }
+                        Caption { text: win.tx("Stimmung", "Mood", "気分") }
                         Flow {
                             width: parent.width
                             spacing: 6
@@ -945,7 +947,7 @@ PanelWindow {
                                 model: win.commands ? win.commands.moodList : []
                                 Tile {
                                     required property var modelData
-                                    label: win.de ? modelData[1] : modelData[2]
+                                    label: win.tx(modelData[1], modelData[2], modelData[3])
                                     pic: legend.moodPic(modelData[0])
                                     tip: legend.moodCommand(modelData[0])
                                     onPick: legend.fire(legend.moodCommand(modelData[0]))
@@ -956,8 +958,9 @@ PanelWindow {
                     Text {
                         width: legendCol.width
                         wrapMode: Text.Wrap
-                        text: win.de ? "Alles lässt sich auch tippen, ohne „aibou“ davor; !befehl läuft in der Shell, anderes geht an die KI."
-                                     : "Everything can be typed too, without \"aibou\"; !command runs in a shell, anything else goes to the AI."
+                        text: win.tx("Alles lässt sich auch tippen, ohne „aibou“ davor; !befehl läuft in der Shell, anderes geht an die KI.",
+                                     "Everything can be typed too, without \"aibou\"; !command runs in a shell, anything else goes to the AI.",
+                                     "ぜんぶ「aibou」なしで入力もできるよ。!コマンド はシェルで動き、それ以外は AI へ。")
                         color: win.world.outline
                         font.pixelSize: 11
                         topPadding: 4
@@ -1078,7 +1081,7 @@ PanelWindow {
                 }
                 Text {
                     visible: input.text === ""
-                    text: win.de ? "Schreib " + win.st.name + " was … (help: Befehle)" : "Say something to " + win.st.name + " … (help: commands)"
+                    text: win.tx("Schreib " + win.st.name + " was … (help: Befehle)", "Say something to " + win.st.name + " … (help: commands)", win.st.name + " になにか話して … (help: コマンド)")
                     color: win.world.outline
                     font.pixelSize: 14
                 }

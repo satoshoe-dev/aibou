@@ -18,7 +18,9 @@ Item {
     property real glassOpacity: 0.65         // DMS frameOpacity, which termfx follows
     property color frameColor: glassTint     // the frame as DMS draws it (frameColor), at glassOpacity
     property string wallpaper: ""            // shown in the gap under a lifted window
-    property string lang: "en"
+    property string lang: "en"           // de, ja or en (from DMS, via aiboud)
+    // the text for the language: Japanese falls back to English where none is given
+    function tr(de, en, ja) { return lang === "de" ? de : lang === "ja" && ja !== undefined ? ja : en }
     property bool onBattery: false
 
     // settings from plugin_settings.json ("aibou"), defaults here

@@ -85,14 +85,40 @@ Item {
             micOn: ["Psst, das Mikrofon ist an (%1).", "Pst! %1 hört mit."],
             unit: ["%1 ist ausgefallen. Hmpf.", "Der Dienst %1 läuft nicht mehr!"],
             dms: ["Die Leiste meldet einen Fehler: %1", "DMS meckert: %1"]
+        },
+        ja: {
+            hello: ["おはよう!", "ただいま!", "えへへ、いたいた!"],
+            callFriend: ["だれかいる? 遊ぼうよ!", "おーい? ひとりぼっちだよ~", "みんな、こっちおいで!"],
+            visit: ["ちょっと様子を見に来たよ~", "*ちらっ*", "上は大丈夫?", "水分とるの忘れないでね!", "たいくつ~", "ねえねえ、やっほー。"],
+            pet: ["えへへ~", "やっほー、%n!", "くすぐったい!", "はいはい、ここにいるよ!"],
+            nochat: ["えへへ~ (チャットはオフだよ)"],
+            front: ["ここで一緒にいるね!", "特等席!"],
+            back: ["かくれがに戻るね~"],
+            error: ["あれれ、いま頭がからっぽ。", "頭が働かないみたい…"],
+            crash: ["%1 が落ちちゃった! むぅ。", "ねえ! %1 が落ちたよ。"],
+            recOn: ["あっ、カメラ! みんな、やっほー!", "録画中? *手をふる*", "見てるみんな、こんにちは!"],
+            recOff: ["ばいばい!", "カット!"],
+            download: ["ダウンロード完了: %1", "%1 が届いたよ!"],
+            batLow: ["バッテリー %1 % … ねむくなってきた。", "あと %1 %。充電して?"],
+            batCrit: ["バッテリーがほとんどない! はやく充電して!"],
+            batOk: ["ふぅ、電気だ! ありがとう!", "んー、電気おいしい。"],
+            updates: ["アップデートが %1 件あるよ。", "%1 件のアップデートが待ってるよ。"],
+            updDone: ["アップデートが終わったよ (%2)。", "%1 が終わったよ (%2)。"],
+            buildDone: ["ビルド完了! (%1, %2)", "%1 が %2 で終わったよ。やったね!"],
+            welcome: ["おかえり、%n!", "あ、戻ってきた!", "やっほー! さみしかったよ。"],
+            welcomeShort: ["もう戻ってきたの?", "またまたやっほー!"],
+            usb: ["USB メモリだ! (%1)", "おっ、なにか挿さった: %1"],
+            micOn: ["しーっ、マイクがオンだよ (%1)。", "しっ! %1 が聞いてるよ。"],
+            unit: ["%1 が止まっちゃった。むぅ。", "サービス %1 が動いてないよ!"],
+            dms: ["バーがエラーを出してるよ: %1", "DMS がぶつぶつ言ってる: %1"]
         }
     })
     // a line for the moment; %n is the user's name (setting "userName")
     function say(key) {
-        const t = (words[world.lang] || words.en)[key]
+        const t = (words[world.lang] || words.en)[key] || words.en[key]
         const name = String(world.opt("userName", "") || "")
         const l = t[Math.floor(Math.random() * t.length)]
-        return name ? l.replace("%n", name) : l.replace(/,? ?%n/, "")
+        return name ? l.replace("%n", name) : l.replace(/[,、]? ?%n/, "")
     }
     function pick(weights) {
         let sum = 0
@@ -668,7 +694,8 @@ Item {
     property real halfAmp: 0.35
     property bool slipChance: false
     property bool slid: false
-    function pickCall(de, en) { const l = world.lang === "de" ? de : en; return l[Math.floor(Math.random() * l.length)] }
+    function pickCall(de, en, ja) { const l = world.tr(de, en, ja); return l[Math.floor(Math.random() * l.length)] }
+    function tr(de, en, ja) { return world.tr(de, en, ja) }
     property var monkeyPlan: []
     property bool stunt: false           // a jump of his own: landing makes him proud, not cross
     property real hookAt: 0
@@ -750,7 +777,7 @@ Item {
             const total = world.floorY - top
             if (grStyle === "zip") {
                 // the gun's winch: up in one smooth pull
-                st.call(pickCall(["Zzzip!", "Wiiiu!"], ["Zzzip!", "Wheee!"]))
+                st.call(pickCall(["Zzzip!", "Wiiiu!"], ["Zzzip!", "Wheee!"], ["シュルルッ!", "ひゅーん!"]))
                 ropeAnim.easing.type = Easing.InOutQuad
                 ropeAnim.duration = 1200 + Math.random() * 800
                 ropeAnim.to = 0
@@ -763,7 +790,7 @@ Item {
                 grStage = "swingHalf"
                 st.swingAmp = halfAmp
                 st.pump = 2 + Math.random()
-                st.call(pickCall(["Hui!", "Juchu!", "Hihi!"], ["Whee!", "Yay!", "Wooo!"]))
+                st.call(pickCall(["Hui!", "Juchu!", "Hihi!"], ["Whee!", "Yay!", "Wooo!"], ["わーい!", "やったー!", "ひゃっほー!"]))
                 grTimer.interval = 1600 + Math.random() * 1400; grTimer.restart()
                 return
             }
@@ -775,7 +802,7 @@ Item {
                 ropeAnim.to = st.ropeLen + 50 + Math.random() * 40
                 ropeAnim.restart()
                 st.feel("scared", 1)
-                st.call(pickCall(["Hoppla!", "Huch!"], ["Whoops!", "Eek!"]))
+                st.call(pickCall(["Hoppla!", "Huch!"], ["Whoops!", "Eek!"], ["おっと!", "ひゃっ!"]))
                 grTimer.interval = 1100; grTimer.restart()
                 return
             }
@@ -919,7 +946,7 @@ Item {
         case "banana":
             st.eatBanana(Math.random() < 0.5 ? -1 : 1)
             st.mood = "happy"
-            st.call(world.lang === "de" ? "Mampf!" : "Nom!")
+            st.call(tr("Mampf!", "Nom!", "もぐもぐ!"))
             grStage = "banana"
             return
         case "callFive": {
@@ -931,7 +958,7 @@ Item {
             let side = b.x0 > st.pivotX ? 1 : -1
             let at = st.pivotX + side * st.size * 1.75
             if (at < world.insets.left + st.size || at > world.areaW - world.insets.right - st.size) { side = -side; at = st.pivotX + side * st.size * 1.75 }
-            st.call(world.lang === "de" ? "Komm hoch!" : "Come up!")
+            st.call(tr("Komm hoch!", "Come up!", "上においでよ!"))
             b.brain.whenFree(() => b.brain.comeUpTo(at))
             grStage = "waitFive"
             grTimer.interval = 25000; grTimer.restart()
@@ -960,7 +987,7 @@ Item {
         case "scratch":
             st.scratch(Math.random() < 0.5 ? -1 : 1)
             st.mood = "curious"
-            st.call(world.lang === "de" ? "Uh uh ah ah!" : "Ooh ooh ah ah!")
+            st.call(tr("Uh uh ah ah!", "Ooh ooh ah ah!", "ウキキッ!"))
             grStage = "scratchEnd"; grTimer.interval = 1500; grTimer.restart()
             return
         case "swing":
@@ -1026,7 +1053,7 @@ Item {
         st.stopAll()
         st.squat()
         st.feel("proud", 2)
-        st.call(voice("tidy", undefined, world.lang === "de" ? "Aufgeräumt!" : "All tidy!"))
+        st.call(voice("tidy", undefined, tr("Aufgeräumt!", "All tidy!", "おかたづけ完了!")))
         moodBackLater.restart()
     }
     function slipOnPeel(dir) {
@@ -1037,7 +1064,7 @@ Item {
         const by = world.peelBy
         for (const o of world.active) {
             if (o === st) continue
-            if (o === by) { o.mood = "smug"; o.call(o.brain ? o.brain.voice("happy", undefined, world.lang === "de" ? "Hihi!" : "Hee hee!") : (world.lang === "de" ? "Hihi!" : "Hee hee!")) }
+            if (o === by) { o.mood = "smug"; o.call(o.brain ? o.brain.voice("happy", undefined, tr("Hihi!", "Hee hee!", "えへへ!")) : tr("Hihi!", "Hee hee!", "えへへ!")) }
             else if (o.brain && o.brain.doing === "idle") { o.mood = "smug"; o.brain.moodBackLater() }
         }
     }
@@ -1097,7 +1124,7 @@ Item {
         bounces = 0
         flyVX = Math.max(-2200, Math.min(2200, v.vx * 1.15))
         flyVY = Math.min(-200, v.vy - 350)
-        st.call(world.lang === "de" ? "Juhuu!" : "Wheee!")
+        st.call(tr("Juhuu!", "Wheee!", "わーい!"))
         flyT = Date.now()
         flight.start()
     }
@@ -1341,7 +1368,7 @@ Item {
         ptrT = Date.now(); ptrVX = 0; ptrVXs = 0
         shakes = []; shakeDir = 0
         st.feel("happy", 3)
-        st.call(voice("gotIt", undefined, world.lang === "de" ? "Hab dich!" : "Got you!"))
+        st.call(voice("gotIt", undefined, tr("Hab dich!", "Got you!", "つかまえた!")))
         hangTired.restart()
     }
     // where the grip sits from the pointer's tip (Adwaita arrow, 30 px)
@@ -1379,10 +1406,10 @@ Item {
         world.pointerHolder = null
         pointerCool = Date.now() + 25000
         letGo()
-        st.call(world.lang === "de" ? "Uiii!" : "Whoa!")
+        st.call(tr("Uiii!", "Whoa!", "うわぁ!"))
     }
     // tired of hanging: lets go by himself
-    Timer { id: hangTired; interval: 60000; onTriggered: if (brain.onPointer) { brain.shakenOff(); brain.st.call(brain.world.lang === "de" ? "Genug!" : "Enough!") } }
+    Timer { id: hangTired; interval: 60000; onTriggered: if (brain.onPointer) { brain.shakenOff(); brain.st.call(brain.tr("Genug!", "Enough!", "もういいや!")) } }
 
     // what was asked for while he was up there, after the bob of the landing
     Timer { id: landedThen; property var f: null; interval: 450; onTriggered: if (f && brain.doing === "idle") { const g = f; f = null; g() } }
@@ -1514,7 +1541,7 @@ Item {
         world.tagIt = Math.random() < 0.5 ? st : o
         world.tagUntil = Date.now() + 36000 + Math.random() * 12000
         world.tagFreeze = Date.now() + 1200
-        world.tagIt.call(world.lang === "de" ? "Ich bin dran!" : "I'm it!")
+        world.tagIt.call(tr("Ich bin dran!", "I'm it!", "オニだよ!"))
         return true
     }
     Timer {
@@ -1540,7 +1567,7 @@ Item {
             c.brain.doing = "idle"
             c.danceRest()
             c.feel("happy", 2)
-            c.call(world.lang === "de" ? "Puh!" : "Phew!")
+            c.call(tr("Puh!", "Phew!", "ふぅ!"))
             c.squat()
             c.brain.moodBackLater()
         }
@@ -1565,7 +1592,7 @@ Item {
             if (d <= reach + 10) {
                 // got you
                 st.poke(dir); target.jolt(); target.mood = "surprised"
-                st.call(voice("gotIt", undefined, world.lang === "de" ? "Hab dich!" : "Got you!"))
+                st.call(voice("gotIt", undefined, tr("Hab dich!", "Got you!", "つかまえた!")))
                 world.tagIt = target
                 world.tagFreeze = Date.now() + 2600
                 target.feel("happy", 2)
@@ -1592,7 +1619,7 @@ Item {
         const to = st.x0 + dir * (48 + Math.random() * 26) * speed
         if (to < st.minX + 4 || to > st.maxX - 4) {
             // cornered: over the chaser to the open side
-            if (dist < (it.size + st.size) * 1.4 && leapOver(it, -dir)) { st.call(world.lang === "de" ? "Hihi!" : "Hee!"); return }
+            if (dist < (it.size + st.size) * 1.4 && leapOver(it, -dir)) { st.call(tr("Hihi!", "Hee!", "へへっ!")); return }
             return
         }
         st.gazeX = dir
@@ -1640,7 +1667,7 @@ Item {
             seekCount++
             st.coverEyes = false
             st.handLX = 0; st.handLY = 0; st.handRX = 0; st.handRY = 0
-            st.call(world.lang === "de" ? "Ich komme!" : "Ready or not!")
+            st.call(tr("Ich komme!", "Ready or not!", "いくよー!"))
             st.mood = "curious"
             seekWrong = 1 + Math.floor(Math.random() * 2)
             seekTimer.interval = 900; seekTimer.restart()
@@ -1680,7 +1707,7 @@ Item {
         if (o.place === "dock" && o.dockSide === "frame") {
             st.poke(st.gazeX); o.jolt()
         } else st.gazeY = -1
-        st.call(world.lang === "de" ? "Gefunden!" : "Found you!")
+        st.call(tr("Gefunden!", "Found you!", "みーつけた!"))
         st.feel("happy", 3)
         o.brain.found()
         endSeekLater.restart()
@@ -1701,7 +1728,7 @@ Item {
         if (doing === "play") stopPlay()
         hiding = true
         st.feel("happy", 2)
-        st.call(world.lang === "de" ? "Hihi!" : "Hee hee!")
+        st.call(tr("Hihi!", "Hee hee!", "えへへ!"))
         const far = seeker.x0 < world.areaW / 2 ? st.maxX - Math.random() * 300 : st.minX + Math.random() * 300
         if (Math.random() < 0.45 && !saving) {
             doing = "toHide"; walkTarget = far; hideHow = "top"
@@ -1725,7 +1752,7 @@ Item {
         hiding = false
         hidePeek.stop()
         st.feel("happy", 3)
-        st.call(world.lang === "de" ? "Hihi, gefunden!" : "Hee, you found me!")
+        st.call(tr("Hihi, gefunden!", "Hee, you found me!", "えへへ、見つかっちゃった!"))
         if (doing === "grapple" && grStage === "hiding") { monkeyPlan = [Math.random() < 0.5 ? "dismount" : "abseil"]; grStage = "monkey"; grTimer.interval = 600; grTimer.restart() }
         else if (st.place === "dock") { noDockUntil = Date.now() + 60000; wake(true); leaveDock() }
     }
@@ -1739,7 +1766,7 @@ Item {
         lastSnack = Date.now()
         doing = "snack"
         st.feel("happy", 2)
-        st.call(voice("snack", undefined, pickCall(["Mampf!", "Lecker!", "Hmm!"], ["Nom!", "Yummy!", "Mmm!"])))
+        st.call(voice("snack", undefined, pickCall(["Mampf!", "Lecker!", "Hmm!"], ["Nom!", "Yummy!", "Mmm!"], ["もぐもぐ!", "おいしい!", "んー!"])))
         st.eatSnack()
         return true
     }
@@ -1752,14 +1779,14 @@ Item {
         if (!k || !onFloor(st.place) || st.moving) return false
         lastHobby = Date.now()
         doing = "hobby"
-        if (k === "juggle") { st.feel("happy", 2); st.call(pickCall(["Hopp, hopp!", "Schau mal!"], ["Hup, hup!", "Look!"])); st.juggle() }
-        else if (k === "yoga") { st.call(pickCall(["Ommm …", "Und ausatmen …"], ["Ommm …", "And breathe out …"])); st.yoga() }
+        if (k === "juggle") { st.feel("happy", 2); st.call(pickCall(["Hopp, hopp!", "Schau mal!"], ["Hup, hup!", "Look!"], ["ほいっ、ほいっ!", "見て見て!"])); st.juggle() }
+        else if (k === "yoga") { st.call(pickCall(["Ommm …", "Und ausatmen …"], ["Ommm …", "And breathe out …"], ["オーム …", "はい、息をはいて …"])); st.yoga() }
         else {
             st.mood = "smug"
             // Neko washes, Arai scrubs, Kuro polishes his glass
-            st.call(st.skin === "neko" ? pickCall(["*putz putz*"], ["*lick lick*"])
-                    : st.skin === "arai" ? pickCall(["*schrubb schrubb*"], ["*scrub scrub*"])
-                    : pickCall(["*quietsch quietsch*"], ["*squeak squeak*"]))
+            st.call(st.skin === "neko" ? pickCall(["*putz putz*"], ["*lick lick*"], ["*ぺろぺろ*"])
+                    : st.skin === "arai" ? pickCall(["*schrubb schrubb*"], ["*scrub scrub*"], ["*ごしごし*"])
+                    : pickCall(["*quietsch quietsch*"], ["*squeak squeak*"], ["*きゅっきゅっ*"]))
             st.polish()
         }
         return true
@@ -1781,7 +1808,7 @@ Item {
         world.raceDir = dir
         world.raceWinner = null
         st.gazeX = dir; o.gazeX = dir
-        st.call(world.lang === "de" ? "Wettrennen!" : "Race you!")
+        st.call(tr("Wettrennen!", "Race you!", "かけっこしよう!"))
         raceCount.n = 3; raceCount.players = [st, o]; raceCount.restart()
         return true
     }
@@ -1793,7 +1820,7 @@ Item {
         onTriggered: {
             if (n > 0) { brain.st.call(String(n)); for (const p of players) p.bob(); n--; return }
             stop()
-            brain.st.call(brain.world.lang === "de" ? "Los!" : "Go!")
+            brain.st.call(brain.tr("Los!", "Go!", "よーい、ドン!"))
             for (const p of players) if (p.brain && p.brain.doing === "raceReady") p.brain.raceGo()
         }
     }
@@ -1820,10 +1847,10 @@ Item {
         if (!world.raceWinner) {
             world.raceWinner = st
             st.feel("happy", 3); st.cheer(); st.jump(24)
-            st.call(world.lang === "de" ? "Erster!" : "First!")
+            st.call(tr("Erster!", "First!", "いちばん!"))
         } else {
             st.mood = Math.random() < 0.5 ? "sad" : "smug"
-            st.call(pickCall(["Knapp!", "Nächstes Mal!"], ["Close one!", "Next time!"]))
+            st.call(pickCall(["Knapp!", "Nächstes Mal!"], ["Close one!", "Next time!"], ["おしい!", "次こそ!"]))
         }
         moodBackLater()
     }
@@ -1856,7 +1883,7 @@ Item {
         frogTurns = 0
         frogJumper = null
         frogStage = "line"
-        st.call(world.lang === "de" ? "Bockspringen!" : "Leapfrog!")
+        st.call(tr("Bockspringen!", "Leapfrog!", "馬とびしよう!"))
         frogTick.restart()
         return true
     }
@@ -1938,7 +1965,7 @@ Item {
         bock(back, false)
         back.gazeX = frogDir
         back.feel("happy", 2)
-        if (Math.random() < 0.5) back.call(world.lang === "de" ? "Hopp!" : "Hup!")
+        if (Math.random() < 0.5) back.call(tr("Hopp!", "Hup!", "ぴょん!"))
     }
 
     // ── jump rope: two turn it (or one, the other end tied to the edge of
@@ -1965,7 +1992,7 @@ Item {
         jrPlayers = ps
         jrRound = 0
         jrBest = 0; jrBestBy = null
-        st.call(world.lang === "de" ? "Seilspringen!" : "Jump rope!")
+        st.call(tr("Seilspringen!", "Jump rope!", "なわとびしよう!"))
         ropeRound()
         return true
     }
@@ -2024,7 +2051,7 @@ Item {
     function ropeStep() {
         const ps = jrPlayers
         if (ps.length < 2 || ps.some(p => !p.brain || p.brain.doing !== "rope" || p.held || !onFloor(p.place))) { endRope(); return }
-        const j = jrJumper, de = world.lang === "de"
+        const j = jrJumper
         if (jrStage === "place") {
             let ready = true
             for (const p of ps) {
@@ -2045,7 +2072,7 @@ Item {
             ropeHands(world.jrPhase)
             jrStage = "ready"
             jrT = Date.now(); jrGo = jrT
-            j.call(de ? "Los!" : "Go!")
+            j.call(tr("Los!", "Go!", "せーの!"))
             jrTick.interval = 16
             return
         }
@@ -2094,14 +2121,14 @@ Item {
         world.jrSlack = false
     }
     function ropeMiss() {
-        const j = jrJumper, de = world.lang === "de"
+        const j = jrJumper
         jrStage = "miss"
         world.jrPhase = Math.PI
         world.jrSlack = true
         j.lift = 0; j.sx = 1; j.sy = 1
         j.jolt()
         j.feel(Math.random() < 0.5 ? "sad" : "angry", 1)
-        j.call((de ? "Hoppla! " : "Oops! ") + jrCount)
+        j.call(tr("Hoppla! ", "Oops! ", "あっ! ") + jrCount)
         if (jrCount > jrBest) { jrBest = jrCount; jrBestBy = j }
         jrTick.stop()
         ropeNext.restart()
@@ -2113,7 +2140,7 @@ Item {
             brain.jrRound++
             if (brain.jrRound >= brain.jrPlayers.length) {
                 const w = brain.jrBestBy
-                if (w) { w.feel("happy", 3); w.cheer(); w.call((brain.world.lang === "de" ? "Rekord: " : "Record: ") + brain.jrBest) }
+                if (w) { w.feel("happy", 3); w.cheer(); w.call(brain.tr("Rekord: ", "Record: ", "新記録: ") + brain.jrBest) }
                 brain.endRope()
                 return
             }
@@ -2141,10 +2168,9 @@ Item {
             const ps = players
             if (ps.length < 2 || ps.some(p => !p.brain || p.brain.doing !== "rps")) { stop(); return }
             n++
-            const de = brain.world.lang === "de"
             if (n <= 3) {
                 // "Schnick, Schnack, Schnuck": the fists go up and down
-                const w = de ? ["Schnick", "Schnack", "Schnuck!"] : ["Rock", "Paper", "Scissors!"]
+                const w = brain.tr(["Schnick", "Schnack", "Schnuck!"], ["Rock", "Paper", "Scissors!"], ["じゃん", "けん", "ぽん!"])
                 ps[0].call(w[n - 1])
                 for (const p of ps) p.armUp(p.gazeX, 0.5)
                 return
@@ -2168,7 +2194,7 @@ Item {
             for (const p of ps) if (p.brain) p.brain.doing = "idle"
             if (result === 0) {
                 for (const p of ps) { p.mood = "surprised"; p.brain.moodBackLater() }
-                ps[0].call(brain.world.lang === "de" ? "Unentschieden!" : "A draw!")
+                ps[0].call(brain.tr("Unentschieden!", "A draw!", "あいこ!"))
                 return
             }
             const win = ps[result - 1], lose = ps[2 - result]
@@ -2183,7 +2209,7 @@ Item {
         lastRepair = Date.now()
         doing = "repair"
         st.mood = "curious"
-        st.call(pickCall(["Klonk!", "Bzzt!", "Mal sehen …"], ["Clonk!", "Bzzt!", "Let's see …"]))
+        st.call(pickCall(["Klonk!", "Bzzt!", "Mal sehen …"], ["Clonk!", "Bzzt!", "Let's see …"], ["カン!", "ビビッ!", "どれどれ …"]))
         st.repair()
         return true
     }
@@ -2199,7 +2225,7 @@ Item {
             if (brain.doing !== "repair") return
             brain.doing = "idle"
             brain.st.mood = "proud"
-            brain.st.call(brain.pickCall(["Repariert!", "Wie neu!"], ["Fixed!", "Good as new!"]))
+            brain.st.call(brain.pickCall(["Repariert!", "Wie neu!"], ["Fixed!", "Good as new!"], ["直った!", "新品同様!"]))
             brain.moodBackLater()
         }
         function onHobbyDone() {
@@ -2217,7 +2243,7 @@ Item {
                 && (force || Math.random() < 0.75)) {
             napTop = true
             st.mood = "sleepy"
-            st.call(voice("yawn", undefined, pickCall(["*gähn*"], ["*yawn*"])))
+            st.call(voice("yawn", undefined, pickCall(["*gähn*"], ["*yawn*"], ["*ふあぁ*"])))
             climb()
             return
         }
@@ -2285,7 +2311,7 @@ Item {
     }
     // the nearest one says hello out loud and goes over to greet him
     function welcomeLead(newbie) {
-        st.call(voice("hi", newbie.name, (world.lang === "de" ? "Hallo " : "Hi ") + newbie.name + "!"))
+        st.call(voice("hi", newbie.name, tr("Hallo " + newbie.name + "!", "Hi " + newbie.name + "!", newbie.name + "、こんにちは!")))
         welcomeWalk.target = newbie
         welcomeWalk.restart()
     }
