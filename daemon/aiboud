@@ -876,10 +876,12 @@ def wallpaper():
 # ── music: is something playing, and where are the beats ─────────
 
 # fixed sensitivity like AudioFX (autosens squashes the very peaks a kick is
-# made of), but 60 frames a second and little smoothing so kicks stay apart.
-# Measured live on frenchcore: hit rate 0.77 against 0.51 with autosens.
-CAVA_CONF = """[general]
-framerate=60
+# made of) and little smoothing so kicks stay apart. Measured live on
+# frenchcore: hit rate 0.77 against 0.51 with autosens. 30 frames a second
+# find the same beats as 60 at half the cost (see the windows below, in s).
+CAVA_FPS = 30
+CAVA_CONF = f"""[general]
+framerate={CAVA_FPS}
 bars=16
 autosens=0
 sensitivity=100
@@ -939,9 +941,12 @@ class BeatTracker:
        into phase, a missing kick is filled in. Without a steady tempo (no
        onset on the grid for a while) the onsets themselves are the beats."""
     LO, HI = 60 / 240, 60 / 90           # every kick up to 240 per minute (frenchcore)
-    def __init__(self):
+    def __init__(self, fps=None):
+        fps = fps or CAVA_FPS
+        self.fps = fps
         self.prev = 0.0
-        self.flux = deque(maxlen=90)
+        self.flux = deque(maxlen=round(1.5 * fps))     # 1.5 s of rises for the onset threshold
+        self.fsum = self.fsq = 0.0                      # their running sum and sum of squares
         self.last_onset = -1.0
         self.rising = False
         self.onsets = deque(maxlen=24)
@@ -953,8 +958,8 @@ class BeatTracker:
         self.last_tempo = 0.0
         self.bpm = 0.0
         self.pending = 0.0
-        self.hist = deque(maxlen=360)   # 6 s of the bass's rise, for the tempo
-        self.times = deque(maxlen=360)
+        self.hist = deque(maxlen=round(6 * fps))   # 6 s of the bass's rise, for the tempo
+        self.times = deque(maxlen=round(6 * fps))
     def tempo(self, now):
         """the beat period from the autocorrelation of the bass's rise over the
         last 6 s. Each lag counts with its multiples up to four (a comb): only
@@ -962,7 +967,7 @@ class BeatTracker:
         between the kicks (psytrance) would otherwise win with 3/4 of a beat"""
         f = list(self.hist)
         n = len(f)
-        if n < 240: return 0.0
+        if n < 4 * self.fps: return 0.0
         dt = (self.times[-1] - self.times[0]) / (len(self.times) - 1)
         m = sum(f) / n
         f = [x - m for x in f]
@@ -974,7 +979,7 @@ class BeatTracker:
             return ac[l]
         best, bl = 0.0, 0
         for l in range(lo, hi + 1):
-            sc = sum(corr(k * l) for k in range(1, 5) if k * l < n - 60)
+            sc = sum(corr(k * l) for k in range(1, 5) if k * l < n - self.fps)
             if sc > best: best, bl = sc, l
         if bl == 0 or corr(bl) <= 0 or corr(bl) < 0.08 * corr(0): return 0.0
         # between frames: a parabola through the neighbours
@@ -999,25 +1004,36 @@ class BeatTracker:
         d = (target - self.next + p / 2) % p - p / 2
         self.next += d if abs(d) > 0.25 * p else 0.5 * d
         if self.next < now - 0.01: self.next += p
+    def flux_stats(self):
+        """mean and spread of the recent rises (kept as running sums: this
+        runs for every frame)"""
+        n = len(self.flux)
+        m = self.fsum / n
+        return m, math.sqrt(max(0.0, self.fsq / n - m * m))
+
     def feed(self, now, bands):
         out = []
         bass = 0.6 * bands[0] + 0.4 * bands[1]
         f = max(0.0, bass - self.prev)
         self.prev = bass
-        if len(self.flux) > 20:
-            m = statistics.fmean(self.flux)
-            sd = statistics.pstdev(self.flux)
+        if len(self.flux) > self.fps / 3:
+            m, sd = self.flux_stats()
             onset = f > m + 1.5 * sd + 6 and not self.rising and now - self.last_onset > 0.15
         else:
             onset = False
         self.rising = f > 0 and (self.rising or onset)
         if f == 0: self.rising = False
+        if len(self.flux) == self.flux.maxlen:
+            old = self.flux[0]
+            self.fsum -= old; self.fsq -= old * old
         self.flux.append(f)
+        self.fsum += f; self.fsq += f * f
         self.hist.append(f)
         self.times.append(now)
         if onset:
             self.last_onset = now
-            s = min(1.0, f / (statistics.fmean(self.flux) + 3 * statistics.pstdev(self.flux) + 1))
+            m, sd = self.flux_stats()
+            s = min(1.0, f / (m + 3 * sd + 1))
             self.onsets.append((now, s))
             self.strength = 0.7 * self.strength + 0.3 * s
         # the tempo, twice a second
@@ -1052,7 +1068,8 @@ class BeatTracker:
             if abs(ph) < 0.2:
                 self.next += 0.4 * ph * self.period
                 self.matched = True
-        if self.next and now >= self.next - 0.008:
+        # a frame ahead: the caller schedules the beat for its exact time
+        if self.next and now >= self.next - 1 / self.fps:
             out.append(self.next)
             self.miss = 0 if self.matched else self.miss + 1
             self.matched = False
@@ -1097,10 +1114,12 @@ async def beats():
                     continue
             except ValueError:
                 continue
-            for _ in tracker.feed(time.monotonic(), bands):
+            now = time.monotonic()
+            for at in tracker.feed(now, bands):
                 msg = {"t": "beat", "s": round(min(1.0, max(0.2, tracker.strength)), 2), "bpm": round(tracker.bpm)}
-                if delay > 0:
-                    loop.call_later(delay, emit, msg)
+                wait = max(0.0, at - now) + delay
+                if wait > 0:
+                    loop.call_later(wait, emit, msg)
                 else:
                     emit(msg)
     finally:
