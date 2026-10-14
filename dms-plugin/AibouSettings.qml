@@ -483,8 +483,9 @@ PluginSettings {
         }
         function checkKeys() {
             if (list.length === 0) return
-            const ids = list.map(p => p.id).join(" ")
-            lookProc.command = ["sh", "-c", "for i in " + ids + "; do secret-tool lookup service aibou provider $i >/dev/null 2>&1 && echo $i; done"]
+            // the ids as arguments, never as part of the script
+            lookProc.command = ["sh", "-c", "for i in \"$@\"; do secret-tool lookup service aibou provider \"$i\" >/dev/null 2>&1 && echo \"$i\"; done",
+                                "sh"].concat(list.map(p => String(p.id)))
             lookProc.running = true
         }
         Process {
