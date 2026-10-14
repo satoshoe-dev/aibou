@@ -122,8 +122,8 @@
   "Notifications": {
     "Notifications": "通知"
   },
-  "Shows notifications as a speech bubble. Practically 0.": {
-    "Shows notifications as a speech bubble. Practically 0.": "以对话气泡显示通知。几乎为 0。"
+  "Shows notifications as a speech bubble. For this Aibou reads the title and text of every notification on the session bus; they stay on this computer. Practically 0.": {
+    "Shows notifications as a speech bubble. For this Aibou reads the title and text of every notification on the session bus; they stay on this computer. Practically 0.": "以气泡显示通知。为此 Aibou 会读取会话总线上每条通知的标题和正文；这些内容不会离开这台电脑。几乎为 0。"
   },
   "Frame": {
     "Frame": "边框"
@@ -170,8 +170,8 @@
   "In the bar": {
     "In the bar": "在状态栏中"
   },
-  "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all.": {
-    "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all.": "鼓包：一个带眼睛的圆顶从状态栏的内侧边缘鼓出来。只露脸：什么都不突出，只在状态栏里图标之间的空位露出它的脸。没有空位时，还是会鼓出来。"
+  "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all. The free spot is found in a screenshot of the bar (grim) that stays on this computer.": {
+    "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all. The free spot is found in a screenshot of the bar (grim) that stays on this computer.": "鼓包：带眼睛的圆顶从栏的内侧边缘鼓出来。只露脸：什么都不突出，只在栏内图标之间的空位露出他的脸。没有空位时，他还是会鼓出来。空位是从栏的截图（grim）中找的，截图不会离开这台电脑。"
   },
   "Bulge": {
     "Bulge": "鼓包"
@@ -182,8 +182,8 @@
   "Feels the machine": {
     "Feels the machine": "感知电脑状态"
   },
-  "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke. Checks every 2 s, practically 0.": {
-    "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke. Checks every 2 s, practically 0.": "高负载时（CPU 持续超过约 60 %、内存超过 82 % 或处理器过热）它开始冒汗，负载很高时会紧闭双眼。程序崩溃或服务失败时它会生气，并说出哪里坏了。每 2 s 检查一次，几乎为 0。"
+  "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke; for that he follows the system journal and DMS's log. Checks every 2 s, practically 0.": {
+    "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke; for that he follows the system journal and DMS's log. Checks every 2 s, practically 0.": "负载高时（CPU 一段时间超过约 60 %、内存超过 82 % 或处理器过热）他会冒汗，负载很高时会紧闭双眼。程序崩溃或服务失败时他会生气，并说出哪里坏了；为此他会跟踪系统日志和 DMS 的日志。每 2 秒检查一次，几乎为 0。"
   },
   "Dances to music": {
     "Dances to music": "随音乐跳舞"
@@ -194,8 +194,8 @@
   "Chat": {
     "Chat": "聊天"
   },
-  "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. 0 locally; each answer counts against the Claude quota.": {
-    "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. 0 locally; each answer counts against the Claude quota.": "在单独的窗口里通过 Claude 聊天，它会跳进窗口。会话在后台一直运行，所以大约一秒后就开始回答，并逐词显示。本地开销为 0；每次回答都计入 Claude 额度。"
+  "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. What you write goes to Anthropic or the provider chosen below. A line starting with ! runs as a command in bash, like in a terminal. 0 locally; each answer counts against the Claude quota.": {
+    "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. What you write goes to Anthropic or the provider chosen below. A line starting with ! runs as a command in bash, like in a terminal. 0 locally; each answer counts against the Claude quota.": "在独立窗口里通过 Claude 聊天；他会跳进去。会话在后台持续运行，所以回答大约一秒后开始，逐词出现。你写的内容会发送给 Anthropic 或下面选择的服务商。以 ! 开头的一行会像在终端里一样作为 bash 命令运行。本地为 0；每次回答都计入 Claude 额度。"
   },
   "Desktop help": {
     "Desktop help": "桌面帮助"
@@ -307,5 +307,11 @@
   },
   "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": {
     "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": "聊天时它可以在桌面上查看信息（文件，以及 niri msg、dms ipc get 这类只读命令），并了解 desktop 技能。更改它只会以卡片形式提出；你点击“Run”之前什么都不会执行。root 权限、重启 DMS 或 niri 以及重置始终被禁止。它读取的内容会随你的消息一起发送给聊天服务商。"
+  },
+  "Notices what happens": {
+    "Notices what happens": "留意发生的事"
+  },
+  "He reacts when a download lands in ~/Downloads, a USB drive is plugged in, a program uses the microphone or records the screen, a long build or package run ends, or updates are waiting. For this he watches ~/Downloads, USB events and the audio streams, looks at the names of the running programs every 15 s and runs checkupdates every 3 hours. Nothing leaves the computer. Practically 0.": {
+    "He reacts when a download lands in ~/Downloads, a USB drive is plugged in, a program uses the microphone or records the screen, a long build or package run ends, or updates are waiting. For this he watches ~/Downloads, USB events and the audio streams, looks at the names of the running programs every 15 s and runs checkupdates every 3 hours. Nothing leaves the computer. Practically 0.": "当下载落入 ~/Downloads、插入 USB 驱动器、有程序使用麦克风或录制屏幕、长时间的构建或软件包操作结束、或有更新等待时，他会做出反应。为此他会监视 ~/Downloads、USB 事件和音频流，每 15 秒查看一次正在运行的程序名称，并每 3 小时运行一次 checkupdates。没有任何内容离开这台电脑。几乎为 0。"
   }
 }

@@ -1,6 +1,5 @@
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import qs.Common
 import qs.Services
 import qs.Widgets
@@ -29,13 +28,13 @@ PluginComponent {
         return s === "none" ? "kuro" : s;
     }
 
-    // The tile shows the figure itself where the running DMS's DankIcon can
-    // draw images (a patched DMS); with the stock one a plain symbol.
-    FileView {
-        id: dankIconSource
-        path: Quickshell.shellDir + "/DankCommon/Widgets/DankIcon.qml"
+    // The tile shows the figure itself where DankIcon can draw images (it
+    // then has the property isImage); otherwise a plain symbol.
+    DankIcon {
+        id: iconProbe
+        visible: false
     }
-    readonly property bool imageIcons: dankIconSource.loaded && dankIconSource.text().indexOf("isImage") >= 0
+    readonly property bool imageIcons: iconProbe.isImage !== undefined
     readonly property string figureIcon: root.imageIcons ? Qt.resolvedUrl("icons/" + root.figure + ".svg").toString() : "mood"
 
     // Poll only while the Control Center is open (popout or island).

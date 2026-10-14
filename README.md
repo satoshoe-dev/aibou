@@ -126,10 +126,28 @@ In the chat window you can type commands without a prefix: `jump`, `dance`, `kis
 `climb arai`, `happy 3`, `more`, `fewer`, `help`. Anything that is not a command goes to the AI.
 Left click a figure to tickle it, double click for the chat, drag to pick it up and throw it.
 
+## What Aibou watches
+
+Everything below stays on the computer, apart from the chat.
+
+- Always: niri's event stream (windows, focus, workspaces, screen casts), the pointer position,
+  DMS's settings, colours and wallpaper, CPU load, memory and temperature from `/proc` and `/sys`,
+  the battery, MPRIS players, and the lock state from logind.
+- While music plays and "Dances to music" is on: a small `cava` for the beat.
+- "Feels the machine" (on by default): the system journal for crashed programs and failed
+  services, and DMS's own log for error lines.
+- "Notifications" (off by default): the title and text of every notification on the session bus.
+- "Notices what happens" (off by default): `~/Downloads`, USB drives, which programs use the
+  microphone, the names of the running programs every 15 s (long builds, screen recorders), and
+  `checkupdates` every three hours.
+- "In the bar: face only": a screenshot of a strip of the bar (`grim`), to find a free spot
+  between the icons.
+
 ## Chat and desktop help
 
 The chat sends your messages off the machine: to Anthropic through the `claude` CLI, or to the
-provider you set up on the settings page.
+provider you set up on the settings page. A line that starts with `!` runs as a command in bash,
+the way it would in a terminal.
 
 "Desktop help" is off by default. Switched on, the chat may read your configuration (`~/.config`,
 `~/.local/bin`, this repository, DMS's cache and the folders under "readDirs") and run a list of
@@ -138,9 +156,21 @@ as cards with a button and nothing runs until you click it. A block list stops r
 restarts of DMS or niri regardless of what the model says. If you keep a Claude Code skill about
 your desktop in `~/.claude/skills/desktop` (or set `AIBOU_SKILL_DIR`), it is read into the help.
 
+Your own read-only commands and block rules go into `~/.config/aibou/desktop-help.json`:
+
+```json
+{
+  "readCommands": ["mytool status"],
+  "blocked": [["\\bmytool\\s+reset\\b", "resets only by hand"]]
+}
+```
+
 ## Optional extras
 
-None of these are needed; without them the figures do a little less.
+None of these are needed; without them the figures do a little less. The niri and DMS patches
+mentioned here are not part of this repository and not supported: Aibou runs on stock niri and
+stock DMS. It asks DMS once at the start (and after a DMS restart) whether it can draw the domes;
+a stock DMS says no and is not asked again.
 
 - `tools/kuro_wallpaper.py` renders a Kuro wallpaper (dark and light). Put the PNGs into
   `~/Pictures/Wallpapers`; Aibou swaps them with the light and dark mode and draws Kuro's eyes alive
@@ -173,7 +203,7 @@ On battery (setting "Battery saver") they play less, set off less often and slee
 | Part | Where |
 |---|---|
 | Scene (Quickshell) | `shell/` (`shell.qml`, `Character.qml` state, `Creature.qml` drawing, `Brain.qml` behaviour) |
-| Daemon | `daemon/aiboud`: niri events, pointer, notifications, DMS colours and frame, battery, music, chat |
+| Daemon | `daemon/aiboud`: niri events, pointer, DMS colours and frame, battery, music, chat, the watchers above |
 | DMS plugin | `dms-plugin/`: Control Center tile and settings page |
 | Helper and service | `bin/aibou`, `systemd/aibou.service` |
 | Tile pictures | `shell/thumbs/`, made by `qs -p shell/thumbs.qml` and `tools/thumbs_crop.py` |

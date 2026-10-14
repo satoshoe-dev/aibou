@@ -185,6 +185,12 @@ def do_not_disturb():
     return until <= 0 or until > time.time() * 1000
 
 
+def option(key, default):
+    """One of Aibou's settings as a bool (DMS stores true/false, older files strings)."""
+    v = SETTINGS.get(key, default)
+    return v if isinstance(v, bool) else str(v).lower() in ("true", "1", "on", "yes")
+
+
 # settings the scene may change by itself (the chat window), and their values
 SETTABLE = {"activity": ("minimal", "calm", "normal", "lively", "max")}
 
@@ -292,6 +298,7 @@ async def watch_files():
             last = stamp
             emit({"t": "insets", **insets(), "gap": niri_gap()})
             emit({"t": "colors", **colors()})
+            BACKDROP_CHECK.set()
             emit({"t": "wallpaper", "path": await asyncio.to_thread(wallpaper)})
         await asyncio.sleep(5)
 
@@ -371,6 +378,7 @@ RECORDERS = ("wf-recorder", "obs", "gpu-screen-recorder", "kooha", "wl-screenrec
 
 CASTS = [[]]                # niri's casts, from its event stream (CastsChanged)
 CASTS_CHANGED = asyncio.Event()
+RECORDING_PROGS = [""]      # a recording program, from the program scan (setting watchSystem)
 
 
 def recording_now():
@@ -379,19 +387,7 @@ def recording_now():
     if CASTS[0]:
         c = CASTS[0][0] if isinstance(CASTS[0], list) else {}
         return str((c or {}).get("app_id") or (c or {}).get("name") or "cast")
-    try:
-        for d in Path("/proc").iterdir():
-            if not d.name.isdigit():
-                continue
-            try:
-                name = (d / "comm").read_text().strip()
-            except OSError:
-                continue
-            if name in RECORDERS:
-                return name
-    except OSError:
-        pass
-    return ""
+    return RECORDING_PROGS[0] if option("watchSystem", False) else ""
 
 
 async def recording():
@@ -401,11 +397,8 @@ async def recording():
         if bool(now) != bool(was):
             emit({"t": "recording", "on": bool(now), "by": now or was})
         was = now
-        # a cast shows at once; recording programs are looked for every 5 s
-        try:
-            await asyncio.wait_for(CASTS_CHANGED.wait(), 5)
-        except asyncio.TimeoutError:
-            pass
+        # woken by niri's casts and by the program scan
+        await CASTS_CHANGED.wait()
         CASTS_CHANGED.clear()
 
 
@@ -494,55 +487,75 @@ JOB_WORDS = {"npm": "build|install|ci|test", "pnpm": "build|install|test", "yarn
              "go": "build|install|test", "docker": "build", "podman": "build", "flatpak": "update|install"}
 
 
-async def long_jobs():
-    """A job from JOBS that ran over a minute and has now ended. Only the
-    outermost one of a kind counts (make under makepkg is part of it)."""
+async def programs():
+    """One look at the running programs every 15 s (only with the setting
+    watchSystem): a job from JOBS that ran over a minute and has now ended,
+    and whether a recording program runs. Only the outermost job of a kind
+    counts (make under makepkg is part of it)."""
     seen = {}                                  # pid -> (name, started, seconds since boot)
     hz = os.sysconf("SC_CLK_TCK")
-    while True:
-        def scan():
-            out = {}
+    try:
+        while True:
+            await programs_once(seen, hz)
+            await asyncio.sleep(15)
+    finally:
+        if RECORDING_PROGS[0]:
+            RECORDING_PROGS[0] = ""
+            CASTS_CHANGED.set()
+
+
+def scan_programs(hz):
+    """Running jobs from JOBS {pid: (name, age in s)} and the first recording program."""
+    out = {}
+    rec = ""
+    try:
+        up = float(Path("/proc/uptime").read_text().split()[0])
+    except (OSError, ValueError):
+        up = 0.0
+    for d in Path("/proc").iterdir():
+        if not d.name.isdigit():
+            continue
+        try:
+            name = (d / "comm").read_text().strip()
+            if name in RECORDERS:
+                rec = rec or name
+            if name not in JOBS:
+                continue
+            stat = (d / "stat").read_text()
+            fields = stat[stat.rindex(")") + 2:].split()
+            ppid = int(fields[1])
+            # when it really started (field 22 of stat, in clock ticks since boot)
+            age = up - int(fields[19]) / hz
+            parent = (Path("/proc") / str(ppid) / "comm").read_text().strip()
+        except (OSError, ValueError, IndexError):
+            continue
+        if parent in JOBS:
+            continue
+        if name in JOB_WORDS:
             try:
-                up = float(Path("/proc/uptime").read_text().split()[0])
-            except (OSError, ValueError):
-                up = 0.0
-            for d in Path("/proc").iterdir():
-                if not d.name.isdigit():
-                    continue
-                try:
-                    name = (d / "comm").read_text().strip()
-                    if name not in JOBS:
-                        continue
-                    stat = (d / "stat").read_text()
-                    fields = stat[stat.rindex(")") + 2:].split()
-                    ppid = int(fields[1])
-                    # when it really started (field 22 of stat, in clock ticks since boot)
-                    age = up - int(fields[19]) / hz
-                    parent = (Path("/proc") / str(ppid) / "comm").read_text().strip()
-                except (OSError, ValueError, IndexError):
-                    continue
-                if parent in JOBS:
-                    continue
-                if name in JOB_WORDS:
-                    try:
-                        cmd = (d / "cmdline").read_bytes().replace(b"\0", b" ").decode(errors="replace")
-                    except OSError:
-                        continue
-                    if not re.search(r"\b(" + JOB_WORDS[name] + r")\b", cmd):
-                        continue
-                out[int(d.name)] = (name, age)
-            return out
-        now = await asyncio.to_thread(scan)
-        t = time.monotonic()
-        for pid, (name, age) in now.items():
-            if pid not in seen or seen[pid][0] != name:
-                seen[pid] = (name, t - age)
-        for pid in [p for p in seen if p not in now]:
-            name, start = seen.pop(pid)
-            secs = round(t - start)
-            if secs >= 60:
-                emit({"t": "jobDone", "name": name, "kind": JOBS[name], "secs": secs})
-        await asyncio.sleep(5)
+                cmd = (d / "cmdline").read_bytes().replace(b"\0", b" ").decode(errors="replace")
+            except OSError:
+                continue
+            if not re.search(r"\b(" + JOB_WORDS[name] + r")\b", cmd):
+                continue
+        out[int(d.name)] = (name, age)
+    return out, rec
+
+
+async def programs_once(seen, hz):
+    now, rec = await asyncio.to_thread(scan_programs, hz)
+    if rec != RECORDING_PROGS[0]:
+        RECORDING_PROGS[0] = rec
+        CASTS_CHANGED.set()
+    t = time.monotonic()
+    for pid, (name, age) in now.items():
+        if pid not in seen or seen[pid][0] != name:
+            seen[pid] = (name, t - age)
+    for pid in [p for p in seen if p not in now]:
+        name, start = seen.pop(pid)
+        secs = round(t - start)
+        if secs >= 60:
+            emit({"t": "jobDone", "name": name, "kind": JOBS[name], "secs": secs})
 
 
 def my_session():
@@ -737,13 +750,25 @@ async def kuro_wall():
         await asyncio.sleep(2)
 
 
+BACKDROP_CHECK = asyncio.Event()     # set when somebody may have rebuilt a background surface
+
+
 async def backdrop_order():
     """In niri's background layer the surface opened last lies on top. When a
-    surface of somebody else's is listed after ours (AudioFX rebuilt by a
-    profile switch), the scene builds its own again, at most every 15 s."""
+    surface of somebody else's is listed after ours (a visualizer rebuilt by a
+    theme or profile switch), the scene builds its own again, at most every
+    15 s. niri has no event for layer surfaces: looked at after DMS changed
+    its settings or restarted, a few seconds after the start, and otherwise
+    every 5 minutes."""
     last = -1e9
+    BACKDROP_CHECK.set()
     while True:
-        await asyncio.sleep(10)
+        try:
+            await asyncio.wait_for(BACKDROP_CHECK.wait(), 300)
+            BACKDROP_CHECK.clear()
+            await asyncio.sleep(4)          # the other one needs a moment to come up
+        except asyncio.TimeoutError:
+            pass
         try:
             r = await asyncio.to_thread(subprocess.run, ["niri", "msg", "-j", "layers"],
                                         capture_output=True, text=True, timeout=5)
@@ -784,25 +809,36 @@ async def dms_errors():
             proc.kill()
 
 
+UNIT_FAILED = "MESSAGE_ID=d9b373ed55a64feb8242e02dbe79a49c"     # systemd: "… Failed with result …"
+
+
 async def failed_units():
-    """Services that went into the failed state since he started."""
-    def failed():
-        out = set()
-        for scope in ([], ["--user"]):
-            try:
-                r = subprocess.run(["systemctl", *scope, "--failed", "--plain", "--no-legend"],
-                                   capture_output=True, text=True, timeout=10)
-            except (OSError, subprocess.SubprocessError):
-                continue
-            out |= {l.split()[0] for l in r.stdout.splitlines() if l.strip()}
-        return out
-    seen = await asyncio.to_thread(failed)
+    """Services that failed since he started: systemd logs each failure under
+    one message id. Counted only when the unit is still failed a few seconds
+    later (one that restarts by itself is not)."""
+    def still_failed(unit, user):
+        try:
+            r = subprocess.run(["systemctl", *(["--user"] if user else []), "is-failed", "--quiet", unit],
+                               capture_output=True, timeout=10)
+            return r.returncode == 0
+        except (OSError, subprocess.SubprocessError):
+            return False
+    uid = str(os.getuid())
     while True:
-        await asyncio.sleep(60)
-        now = await asyncio.to_thread(failed)
-        for unit in sorted(now - seen):
-            emit({"t": "trouble", "kind": "unit", "name": re.sub(r"\.service$", "", unit)})
-        seen = now
+        async for line in lines("journalctl", "-f", "-n", "0", "-o", "json",
+                                "--output-fields=UNIT,USER_UNIT,_UID", UNIT_FAILED):
+            try:
+                e = json.loads(line)
+            except ValueError:
+                continue
+            user = bool(e.get("USER_UNIT"))
+            unit = e.get("USER_UNIT") or e.get("UNIT")
+            if not unit or (user and e.get("_UID") != uid):
+                continue
+            await asyncio.sleep(3)
+            if await asyncio.to_thread(still_failed, unit, user):
+                emit({"t": "trouble", "kind": "unit", "name": re.sub(r"\.service$", "", unit)})
+        await asyncio.sleep(30)
 
 
 BAR_SIG = [None]     # the taken rows beside the faces at the last look
@@ -1185,23 +1221,39 @@ class FrameHost:
 
     @staticmethod
     def dms_pid():
+        """The running `dms run`, from /proc (DMS may run as a service or be
+        started by niri); "" when there is none."""
         try:
-            r = subprocess.run(["systemctl", "--user", "show", "dms", "-p", "MainPID", "--value"],
-                               capture_output=True, text=True, timeout=5)
-            return r.stdout.strip()
-        except (OSError, subprocess.SubprocessError):
-            return ""
+            for d in Path("/proc").iterdir():
+                if not d.name.isdigit():
+                    continue
+                try:
+                    if (d / "comm").read_text().strip() != "dms":
+                        continue
+                    if b"\0run\0" in (d / "cmdline").read_bytes() + b"\0":
+                        return d.name
+                except OSError:
+                    continue
+        except OSError:
+            pass
+        return ""
 
     async def watch(self):
-        """After a DMS restart the domes are sent again (DMS forgot them)."""
-        pid, last_ping = None, 0.0
+        """Asked once at the start and after each DMS restart (then DMS forgot
+        the domes, they are sent again). A stock DMS does not know aibouFrame:
+        after that one failed call it is not asked again until DMS restarts.
+        One that answers is asked every 30 s, in case it lost the patch."""
+        pid, last_ping = None, None
         while True:
-            # the known DMS process still there: no need to ask systemd
+            # the known DMS process still there: nothing to look up
             alive = bool(pid) and Path(f"/proc/{pid}").exists()
             now_pid = pid if alive else await asyncio.to_thread(self.dms_pid)
             restarted = pid is not None and now_pid != pid
             pid = now_pid
-            if restarted or time.monotonic() - last_ping > 30:
+            if restarted:
+                BACKDROP_CHECK.set()
+            due = last_ping is None or (self.on and time.monotonic() - last_ping > 30)
+            if now_pid and (restarted or due):
                 if restarted:
                     await asyncio.sleep(3)          # DMS needs a moment for its IPC
                 last_ping = time.monotonic()
@@ -1215,7 +1267,8 @@ class FrameHost:
                     emit({"t": "frameHost", "on": on, "offsets": offsets, "corners": corners, "domes": domes})
                 if on:      # also an empty list: DMS may still hold domes of an earlier run
                     await asyncio.to_thread(self.call, "set", self.bodies)
-            await asyncio.sleep(5)
+            # without a DMS process it is looked for less often (a /proc scan)
+            await asyncio.sleep(5 if pid else 30)
 
 
 frame_host = FrameHost()
@@ -1564,37 +1617,55 @@ def read_dirs():
 READ_COMMANDS = [
     "niri msg -j", "niri validate", "niri --version",
     "dms version", "dms doctor", "dms ipc --help", "dms keybinds show", "dms plugins list",
-    "dms ipc call settings get", "dms ipc call settings dump", "dms ipc call profiles status",
-    "dms ipc call profiles list", "dms ipc call plugins list", "dms ipc call plugins status",
-    "dms ipc call plugin-scan list", "dms ipc call bar status", "dms ipc call bar getPosition",
+    "dms ipc call settings get", "dms ipc call settings dump", "dms ipc call plugins list",
+    "dms ipc call plugins status", "dms ipc call bar status", "dms ipc call bar getPosition",
     "dms ipc call theme getMode", "dms ipc call wallpaper get", "dms ipc call desktopWidget list",
-    "termfx status", "termfx state", "termfx doctor", "termfx apps", "termfx shell-apps",
-    "dms-profil list", "dms-thema liste", "sleeptimer status", "sleeptimer state", "videomodus status",
-    "orangedeck-dashtab --check", "kitty-kontrast --pruefen", "pear-glas status", "codium-glas status",
     "systemctl --user status", "systemctl --user is-active", "systemctl --user list-units",
     "journalctl --user -u", "journalctl --user -n", "aibou status", "fc-list",
 ]
-# never, whatever is proposed (the skill's safety rules, plus the obvious)
+# never, whatever is proposed
 BLOCKED = [
     (r"\b(sudo|pkexec|doas|su)\b", "needs root rights: run it yourself in a terminal"),
-    (r"orangedeck-dashtab(?![^;&|]*--check)", "rebuilds the DMS overlay and restarts DMS"),
-    (r"dms-leiste-patch|dms-profil-tab|dms-profil-einstellungen|dashtab-hooks\.d", "never run directly (overlay hook)"),
     (r"\bdms\s+(restart|kill|run|setup|update)\b|\bdms\s+plugins\s+(install|uninstall|update)", "only by hand"),
     (r"systemctl\s+--user\s+(restart|stop|kill|disable|mask)\s+(dms|niri)", "only by hand"),
     (r"niri\s+msg\s+action\s+(quit|power-off|focus-|move-.*workspace)", "changes the running session"),
     (r"\b(reboot|poweroff|shutdown|halt)\b|loginctl\s+(terminate|kill)", "ends the session"),
     (r"\b(pkill|pgrep|killall)\b|\bkill\s+-9", "processes only by PID, and not from here"),
     (r"\brm\s+-[a-z]*r|\brm\s+-[a-z]*f", "deletes recursively or without asking"),
-    (r"/usr/(bin|share|local/bin)/|/run/user/\d+/danklinux|\.config/niri/dms/|orangedeck/dms-ui|quickshell/dms-custom", "protected place"),
-    # backups (`<file>.bak-<topic>-YYYYMMDD`) may be made, old ones never run
-    (r"(^|[;&|]\s*)\S*/?\.[\w-]+\.vor-|\bbash\s+\S*\.vor-", "old backup, never run it"),
-    (r"(icon-thema\s+vorher|dms-profil\s+reset|orangedeck-dashtab\s+--remove)", "resets only by hand"),
+    (r"/usr/(bin|share|local/bin)/|/run/user/\d+/danklinux|\.config/niri/dms/", "protected place"),
 ]
+# one's own additions: {"readCommands": ["mytool status", …], "blocked": [["regex", "why"], …]}
+DESKTOP_HELP_EXTRA = HOME / ".config/aibou/desktop-help.json"
+
+
+def help_extra():
+    try:
+        data = json.loads(DESKTOP_HELP_EXTRA.read_text())
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def read_commands_allowed():
+    extra = [c for c in help_extra().get("readCommands") or [] if isinstance(c, str) and c.strip()]
+    return READ_COMMANDS + [c.strip() for c in extra]
+
+
+def blocked_rules():
+    extra = []
+    for r in help_extra().get("blocked") or []:
+        if isinstance(r, (list, tuple)) and len(r) == 2:
+            try:
+                re.compile(r[0])
+                extra.append((str(r[0]), str(r[1])))
+            except re.error:
+                log("desktop-help.json: bad pattern", r[0])
+    return BLOCKED + extra
 ACTION_RX = re.compile(r"```(?:aktion|action)[^\n]*\n(.*?)```", re.S)
 
 DESKTOP = {
     "de": "Du kannst {user} beim Desktop helfen. Lesen darfst du selbst: Dateien und die erlaubten "
-          "lesenden Befehle (niri msg -j, dms ipc call … get/status/list, termfx status und ähnliche). "
+          "lesenden Befehle (niri msg -j, dms ipc call … get/status/list, systemctl --user status und ähnliche). "
           "Alles, was etwas ändert, führst du nie selbst aus und kannst es auch nicht. Du schlägst es als "
           "Aktion vor, ein Befehl je Block, für bash:\n```aktion\nBEFEHL\n```\nDavor ein kurzer Satz, was er "
           "bewirkt. {user} sieht jede Aktion als Karte mit einem Knopf und entscheidet. Danach bekommst du "
@@ -1604,7 +1675,7 @@ DESKTOP = {
           "oder niri und Zurücksetzen nennst du nur als Befehl im Text, nicht als Aktion. Deine Stimmung in "
           "eckigen Klammern nur ganz am Anfang deiner Antwort.",
     "en": "You can help {user} with the desktop. You may read yourself: files and the allowed read-only "
-          "commands (niri msg -j, dms ipc call … get/status/list, termfx status and similar). Anything that "
+          "commands (niri msg -j, dms ipc call … get/status/list, systemctl --user status and similar). Anything that "
           "changes something you never run yourself, and you cannot. You propose it as an action, one command "
           "per block, for bash:\n```action\nCOMMAND\n```\nwith one short sentence before it saying what it "
           "does. {user} sees each action as a card with a button and decides. Afterwards you get the result as "
@@ -1652,7 +1723,7 @@ RULES["ja"] = ("小さなチャット画面で書いています。短く、話�
                "angry。続けて強さ 1 から 3 をつけてもかまいません (1 はすこし、3 はとても)。例: [happy] ここにいるよ。 "
                "[blush3] わあ、ありがとう!")
 DESKTOP["ja"] = ("{user} のデスクトップの手伝いができます。自分で読んでいいのは、ファイルと許可された読み取り専用コマンド "
-                 "(niri msg -j、dms ipc call … get/status/list、termfx status など) です。何かを変えるものは自分では実行"
+                 "(niri msg -j、dms ipc call … get/status/list、systemctl --user status など) です。何かを変えるものは自分では実行"
                  "せず、実行もできません。アクションとして提案します。ブロックひとつにコマンドひとつ、bash 用:\n"
                  "```action\nCOMMAND\n```\n"
                  "その前に、何をするかを短い一文で書きます。{user} はアクションをボタンつきのカードとして見て、決めます。"
@@ -1674,7 +1745,7 @@ def persona(skin, lang, desktop=False):
 
 
 def blocked(cmd):
-    for rx, why in BLOCKED:
+    for rx, why in blocked_rules():
         if re.search(rx, cmd):
             return why
     return None
@@ -1782,7 +1853,7 @@ class Chat:
         self.handover = bool(self.history)
         if desktop:
             tools = ["--tools", "Read,Glob,Grep,Bash", "--permission-mode", "dontAsk",
-                     "--allowedTools", "Read", "Glob", "Grep", *[f"Bash({c}:*)" for c in READ_COMMANDS],
+                     "--allowedTools", "Read", "Glob", "Grep", *[f"Bash({c}:*)" for c in read_commands_allowed()],
                      "--add-dir", *[str(d) for d in read_dirs() if d.exists()]]
         else:
             tools = ["--tools", ""]
@@ -2153,7 +2224,7 @@ API_TOOLS = [
      "parameters": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
     {"name": "list_dir", "description": "List a folder (same folders as read_file).",
      "parameters": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
-    {"name": "run", "description": "Run one read-only command from the allowed list (niri msg -j …, dms ipc call … get/status/list, termfx status, journalctl --user …). No pipes, no redirection.",
+    {"name": "run", "description": "Run one read-only command from the allowed list (niri msg -j …, dms ipc call … get/status/list, systemctl --user status, journalctl --user …). No pipes, no redirection.",
      "parameters": {"type": "object", "properties": {"command": {"type": "string"}}, "required": ["command"]}},
 ]
 
@@ -2189,7 +2260,7 @@ def run_tool(name, args):
         cmd = str(args.get("command", "")).strip()
         if re.search(r"[;&|`$<>\n]", cmd):
             return "refused: one plain command, no pipes, substitution or redirection"
-        if not any(cmd == c or cmd.startswith(c + " ") for c in READ_COMMANDS):
+        if not any(cmd == c or cmd.startswith(c + " ") for c in read_commands_allowed()):
             return "refused: not a read-only command from the allowed list"
         if blocked(cmd):
             return "refused: " + blocked(cmd)
@@ -2389,7 +2460,39 @@ async def kept(watch):
             await asyncio.sleep(5)
 
 
+async def while_on(key, default, watch):
+    """Runs a watcher only while its setting is on; switched off, it is
+    stopped together with the programs it started."""
+    task = None
+    try:
+        while True:
+            on = option(key, default)
+            if on and task is None:
+                task = asyncio.create_task(kept(watch))
+            elif not on and task is not None:
+                task.cancel()
+                task = None
+            await asyncio.sleep(2)
+    finally:
+        if task is not None:
+            task.cancel()
+
+
+# watchers behind a setting: what they read is off unless the user turns it on
+#   notifications: the text of every notification (D-Bus)
+#   watchSystem: ~/Downloads, USB drives, microphone use, the running programs
+#                (long builds, recording programs), pending updates
+#   moods: the journal for crashed programs and failed services, DMS's error lines
+GATED = (
+    ("notifications", False, (notifications,)),
+    ("watchSystem", False, (downloads, usb_watch, mic_watch, programs, updates)),
+    ("moods", True, (crashes, failed_units, dms_errors)),
+)
+
+
 async def main():
+    global SETTINGS
+    SETTINGS = read_settings()
     STATE.mkdir(parents=True, exist_ok=True)
     OUTPUT_SIZE[0] = await asyncio.to_thread(output_size)
     emit({"t": "hello", "lang": language()})
@@ -2397,9 +2500,10 @@ async def main():
     emit({"t": "history", "list": [{"who": "me" if r == "user" else "him", "text": t}
                                    for r, t in chat.shown() if not t.startswith(("[Ergebnis]", "[Result]", "[結果]"))]})
     await asyncio.gather(read_commands(), *(kept(f) for f in (
-        watch_files, watch_settings, pointer_stream, niri_events, layout.flush, notifications,
-        load_watch, crashes, failed_units, follow_players, music, frame_host.watch,
-        recording, downloads, battery, updates, long_jobs, lock_watch, usb_watch, dms_errors, mic_watch, kuro_wall, backdrop_order)))
+        watch_files, watch_settings, pointer_stream, niri_events, layout.flush,
+        load_watch, follow_players, music, frame_host.watch,
+        recording, battery, lock_watch, kuro_wall, backdrop_order)),
+        *(while_on(key, default, f) for key, default, fs in GATED for f in fs))
 
 
 if __name__ == "__main__":

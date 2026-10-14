@@ -122,8 +122,8 @@
   "Notifications": {
     "Notifications": "通知"
   },
-  "Shows notifications as a speech bubble. Practically 0.": {
-    "Shows notifications as a speech bubble. Practically 0.": "通知を吹き出しで表示します。負荷は実質 0 です。"
+  "Shows notifications as a speech bubble. For this Aibou reads the title and text of every notification on the session bus; they stay on this computer. Practically 0.": {
+    "Shows notifications as a speech bubble. For this Aibou reads the title and text of every notification on the session bus; they stay on this computer. Practically 0.": "通知を吹き出しで見せます。そのために Aibou はセッションバス上のすべての通知のタイトルと本文を読みます。通知はこのコンピューターの外に出ません。ほぼ 0。"
   },
   "Frame": {
     "Frame": "フレーム"
@@ -170,8 +170,8 @@
   "In the bar": {
     "In the bar": "バーの中"
   },
-  "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all.": {
-    "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all.": "ふくらみ：目のあるドームがバーの内側の縁からふくらみ出ます。顔だけ：何もはみ出さず、バーの中のアイコンの間の空いた場所に顔だけを出します。空きがなければ、ふくらみ出ます。"
+  "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all. The free spot is found in a screenshot of the bar (grim) that stays on this computer.": {
+    "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all. The free spot is found in a screenshot of the bar (grim) that stays on this computer.": "ふくらみ: 目のあるドームがバーの内側の縁からふくらみます。顔だけ: 何もはみ出さず、バーの中のアイコンの間の空いた場所に顔だけが見えます。場所がなければ、やはりふくらみます。空いた場所はバーのスクリーンショット (grim) から探し、その画像はこのコンピューターの外に出ません。"
   },
   "Bulge": {
     "Bulge": "ふくらみ"
@@ -182,8 +182,8 @@
   "Feels the machine": {
     "Feels the machine": "マシンの状態を感じる"
   },
-  "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke. Checks every 2 s, practically 0.": {
-    "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke. Checks every 2 s, practically 0.": "高負荷（CPU がしばらく約 60 % 超、メモリ 82 % 超、またはプロセッサーが高温）になると汗をかき始め、非常に高負荷では目をぎゅっとつぶります。プログラムがクラッシュしたりサービスが停止したりすると怒って、何が壊れたかを教えます。2 秒ごとに確認し、負荷は実質 0 です。"
+  "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke; for that he follows the system journal and DMS's log. Checks every 2 s, practically 0.": {
+    "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke; for that he follows the system journal and DMS's log. Checks every 2 s, practically 0.": "負荷が高いとき (CPU がしばらく約 60 % 超、メモリ 82 % 超、またはプロセッサが熱いとき) は汗をかき、とても高いと目をぎゅっとつぶります。プログラムがクラッシュしたりサービスが失敗したりすると怒って、何が壊れたかを言います。そのためにシステムジャーナルと DMS のログを追っています。2 秒ごとに確認、ほぼ 0。"
   },
   "Dances to music": {
     "Dances to music": "音楽に合わせて踊る"
@@ -194,8 +194,8 @@
   "Chat": {
     "Chat": "チャット"
   },
-  "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. 0 locally; each answer counts against the Claude quota.": {
-    "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. 0 locally; each answer counts against the Claude quota.": "専用ウィンドウで Claude を通してチャットします。キャラクターはそこに飛び込みます。セッションはバックグラウンドで動き続けるので、回答は約 1 秒で始まり、一語ずつ届きます。ローカルの負荷は 0 で、回答ごとに Claude の利用枠を消費します。"
+  "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. What you write goes to Anthropic or the provider chosen below. A line starting with ! runs as a command in bash, like in a terminal. 0 locally; each answer counts against the Claude quota.": {
+    "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. What you write goes to Anthropic or the provider chosen below. A line starting with ! runs as a command in bash, like in a terminal. 0 locally; each answer counts against the Claude quota.": "専用ウィンドウで Claude とチャットします。彼はその中に飛び込みます。セッションはバックグラウンドで動き続けるので、答えは約 1 秒で始まり、一語ずつ届きます。書いた内容は Anthropic か、下で選んだプロバイダーに送られます。! で始まる行はターミナルと同じように bash のコマンドとして実行されます。ローカルでは 0。答えごとに Claude の利用枠を使います。"
   },
   "Desktop help": {
     "Desktop help": "デスクトップのヘルプ"
@@ -307,5 +307,11 @@
   },
   "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": {
     "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": "チャットでデスクトップを調べられます（ファイル、niri msg や dms ipc get などの読み取り専用コマンド）。desktop スキルも知っています。変更はカードで提案するだけで、「実行」をクリックするまで何も実行しません。root 権限、DMS や niri の再起動、リセットは常にブロックされます。読んだ内容は、メッセージと一緒にチャットのプロバイダーへ送られます。"
+  },
+  "Notices what happens": {
+    "Notices what happens": "起きたことに気づく"
+  },
+  "He reacts when a download lands in ~/Downloads, a USB drive is plugged in, a program uses the microphone or records the screen, a long build or package run ends, or updates are waiting. For this he watches ~/Downloads, USB events and the audio streams, looks at the names of the running programs every 15 s and runs checkupdates every 3 hours. Nothing leaves the computer. Practically 0.": {
+    "He reacts when a download lands in ~/Downloads, a USB drive is plugged in, a program uses the microphone or records the screen, a long build or package run ends, or updates are waiting. For this he watches ~/Downloads, USB events and the audio streams, looks at the names of the running programs every 15 s and runs checkupdates every 3 hours. Nothing leaves the computer. Practically 0.": "~/Downloads にダウンロードが届いたとき、USB ドライブが挿されたとき、プログラムがマイクを使ったり画面を録画したりしたとき、長いビルドやパッケージ処理が終わったとき、アップデートが待っているときに反応します。そのために ~/Downloads、USB のイベント、音声ストリームを見張り、15 秒ごとに動いているプログラムの名前を見て、3 時間ごとに checkupdates を実行します。何もコンピューターの外に出ません。ほぼ 0。"
   }
 }

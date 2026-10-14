@@ -122,8 +122,8 @@
   "Notifications": {
     "Notifications": "Уведомления"
   },
-  "Shows notifications as a speech bubble. Practically 0.": {
-    "Shows notifications as a speech bubble. Practically 0.": "Показывает уведомления в облачке. Практически 0."
+  "Shows notifications as a speech bubble. For this Aibou reads the title and text of every notification on the session bus; they stay on this computer. Practically 0.": {
+    "Shows notifications as a speech bubble. For this Aibou reads the title and text of every notification on the session bus; they stay on this computer. Practically 0.": "Показывает уведомления в облачке. Для этого Aibou читает заголовок и текст каждого уведомления на сессионной шине; они остаются на этом компьютере. Практически 0."
   },
   "Frame": {
     "Frame": "Рамка"
@@ -170,8 +170,8 @@
   "In the bar": {
     "In the bar": "В панели"
   },
-  "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all.": {
-    "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all.": "Выпуклость: купол с глазами выпирает из внутреннего края панели. Только лицо: ничего не выступает, видно только лицо в панели, на свободном месте между значками. Если места нет, фигурка всё же выпирает наружу."
+  "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all. The free spot is found in a screenshot of the bar (grim) that stays on this computer.": {
+    "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all. The free spot is found in a screenshot of the bar (grim) that stays on this computer.": "Выпуклость: купол с глазами выступает из внутреннего края панели. Только лицо: ничего не выступает, видно только его лицо внутри панели, в свободном месте между значками. Если места нет, он всё же выступает куполом. Свободное место ищется на снимке панели (grim), который остаётся на этом компьютере."
   },
   "Bulge": {
     "Bulge": "Выпуклость"
@@ -182,8 +182,8 @@
   "Feels the machine": {
     "Feels the machine": "Чувствует компьютер"
   },
-  "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke. Checks every 2 s, practically 0.": {
-    "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke. Checks every 2 s, practically 0.": "При высокой нагрузке (CPU какое-то время выше 60 %, память выше 82 % или горячий процессор) фигурка начинает потеть, при очень высокой зажмуривается. Если программа падает или служба отказывает, фигурка злится и говорит, что сломалось. Проверяет каждые 2 с, практически 0."
+  "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke; for that he follows the system journal and DMS's log. Checks every 2 s, practically 0.": {
+    "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke; for that he follows the system journal and DMS's log. Checks every 2 s, practically 0.": "При высокой нагрузке (CPU какое-то время выше примерно 60 %, память выше 82 % или горячий процессор) он начинает потеть, при очень высокой нагрузке жмурится. Когда программа падает или служба отказывает, он сердится и говорит, что сломалось; для этого он следит за системным журналом и журналом DMS. Проверка каждые 2 с, практически 0."
   },
   "Dances to music": {
     "Dances to music": "Танцует под музыку"
@@ -194,8 +194,8 @@
   "Chat": {
     "Chat": "Чат"
   },
-  "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. 0 locally; each answer counts against the Claude quota.": {
-    "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. 0 locally; each answer counts against the Claude quota.": "Чат через Claude в отдельном окне, фигурка запрыгивает в него. Сессия продолжает работать в фоне, поэтому ответы начинаются примерно через секунду и приходят слово за словом. Локально 0; каждый ответ расходует квоту Claude."
+  "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. What you write goes to Anthropic or the provider chosen below. A line starting with ! runs as a command in bash, like in a terminal. 0 locally; each answer counts against the Claude quota.": {
+    "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. What you write goes to Anthropic or the provider chosen below. A line starting with ! runs as a command in bash, like in a terminal. 0 locally; each answer counts against the Claude quota.": "Чат с Claude в отдельном окне; он запрыгивает в него. Сессия продолжает работать в фоне, поэтому ответ начинается примерно через секунду и приходит слово за словом. То, что вы пишете, уходит в Anthropic или к провайдеру, выбранному ниже. Строка, начинающаяся с !, выполняется как команда в bash, как в терминале. Локально 0; каждый ответ расходует квоту Claude."
   },
   "Desktop help": {
     "Desktop help": "Помощь с рабочим столом"
@@ -307,5 +307,11 @@
   },
   "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": {
     "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": "В чате фигурка может заглядывать на рабочий стол (файлы, команды только для чтения вроде niri msg и dms ipc get) и знает навык desktop. Изменения она только предлагает карточкой; ничего не выполняется, пока ты не нажмёшь «Run». Права root, перезапуск DMS или niri и сбросы всегда заблокированы. То, что она прочитает, уходит вместе с твоим сообщением к провайдеру чата."
+  },
+  "Notices what happens": {
+    "Notices what happens": "Замечает, что происходит"
+  },
+  "He reacts when a download lands in ~/Downloads, a USB drive is plugged in, a program uses the microphone or records the screen, a long build or package run ends, or updates are waiting. For this he watches ~/Downloads, USB events and the audio streams, looks at the names of the running programs every 15 s and runs checkupdates every 3 hours. Nothing leaves the computer. Practically 0.": {
+    "He reacts when a download lands in ~/Downloads, a USB drive is plugged in, a program uses the microphone or records the screen, a long build or package run ends, or updates are waiting. For this he watches ~/Downloads, USB events and the audio streams, looks at the names of the running programs every 15 s and runs checkupdates every 3 hours. Nothing leaves the computer. Practically 0.": "Он реагирует, когда в ~/Downloads появляется загрузка, подключается USB-накопитель, программа использует микрофон или записывает экран, заканчивается долгая сборка или обновление пакетов, или ждут обновления. Для этого он следит за ~/Downloads, событиями USB и аудиопотоками, каждые 15 с смотрит на имена запущенных программ и раз в 3 часа запускает checkupdates. Ничего не покидает компьютер. Практически 0."
   }
 }

@@ -59,7 +59,7 @@ Item {
     readonly property bool games: opt("games", true)
     readonly property real sleepAfter: opt("sleepAfter", 8)
     readonly property bool sleepAnim: opt("sleepAnim", true)
-    readonly property bool notifications: opt("notifications", true)
+    readonly property bool notifications: opt("notifications", false)
     readonly property bool chat: opt("chat", true)
     readonly property bool batterySaver: opt("batterySaver", true)
     readonly property bool front: opt("front", false)

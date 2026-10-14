@@ -315,8 +315,8 @@ PluginSettings {
     ToggleSetting {
         settingKey: "notifications"
         label: I18n.trFor("aibou", "Notifications")
-        description: I18n.trFor("aibou", "Shows notifications as a speech bubble. Practically 0.")
-        defaultValue: true
+        description: I18n.trFor("aibou", "Shows notifications as a speech bubble. For this Aibou reads the title and text of every notification on the session bus; they stay on this computer. Practically 0.")
+        defaultValue: false
     }
 
     SelectionSetting {
@@ -357,7 +357,7 @@ PluginSettings {
     SelectionSetting {
         settingKey: "barStyle"
         label: I18n.trFor("aibou", "In the bar")
-        description: I18n.trFor("aibou", "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all.")
+        description: I18n.trFor("aibou", "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all. The free spot is found in a screenshot of the bar (grim) that stays on this computer.")
         defaultValue: "bump"
         options: [
             { label: I18n.trFor("aibou", "Bulge"), value: "bump" },
@@ -368,8 +368,15 @@ PluginSettings {
     ToggleSetting {
         settingKey: "moods"
         label: I18n.trFor("aibou", "Feels the machine")
-        description: I18n.trFor("aibou", "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke. Checks every 2 s, practically 0.")
+        description: I18n.trFor("aibou", "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke; for that he follows the system journal and DMS's log. Checks every 2 s, practically 0.")
         defaultValue: true
+    }
+
+    ToggleSetting {
+        settingKey: "watchSystem"
+        label: I18n.trFor("aibou", "Notices what happens")
+        description: I18n.trFor("aibou", "He reacts when a download lands in ~/Downloads, a USB drive is plugged in, a program uses the microphone or records the screen, a long build or package run ends, or updates are waiting. For this he watches ~/Downloads, USB events and the audio streams, looks at the names of the running programs every 15 s and runs checkupdates every 3 hours. Nothing leaves the computer. Practically 0.")
+        defaultValue: false
     }
 
     ToggleSetting {
@@ -382,7 +389,7 @@ PluginSettings {
     ToggleSetting {
         settingKey: "chat"
         label: I18n.trFor("aibou", "Chat")
-        description: I18n.trFor("aibou", "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. 0 locally; each answer counts against the Claude quota.")
+        description: I18n.trFor("aibou", "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. What you write goes to Anthropic or the provider chosen below. A line starting with ! runs as a command in bash, like in a terminal. 0 locally; each answer counts against the Claude quota.")
         defaultValue: true
     }
 

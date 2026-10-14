@@ -122,8 +122,8 @@
   "Notifications": {
     "Notifications": "Notifications"
   },
-  "Shows notifications as a speech bubble. Practically 0.": {
-    "Shows notifications as a speech bubble. Practically 0.": "Affiche les notifications dans une bulle. Pratiquement 0."
+  "Shows notifications as a speech bubble. For this Aibou reads the title and text of every notification on the session bus; they stay on this computer. Practically 0.": {
+    "Shows notifications as a speech bubble. For this Aibou reads the title and text of every notification on the session bus; they stay on this computer. Practically 0.": "Affiche les notifications dans une bulle. Pour cela, Aibou lit le titre et le texte de chaque notification sur le bus de session ; elles restent sur cet ordinateur. Pratiquement 0."
   },
   "Frame": {
     "Frame": "Cadre"
@@ -170,8 +170,8 @@
   "In the bar": {
     "In the bar": "Dans la barre"
   },
-  "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all.": {
-    "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all.": "Bosse : un dôme avec des yeux ressort du bord intérieur de la barre. Visage seul : rien ne dépasse, seul son visage apparaît dans la barre, à un endroit libre entre les icônes. S'il n'y a pas de place, il ressort quand même en bosse."
+  "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all. The free spot is found in a screenshot of the bar (grim) that stays on this computer.": {
+    "Bulge: a dome with eyes bulges out of the bar's inner edge. Face only: nothing sticks out, only his face shows inside the bar, in a free spot between the icons. If there is no room, he bulges out after all. The free spot is found in a screenshot of the bar (grim) that stays on this computer.": "Bosse : un dôme avec des yeux sort du bord intérieur de la barre. Visage seul : rien ne dépasse, seul son visage apparaît dans la barre, à un endroit libre entre les icônes. S'il n'y a pas de place, il sort quand même en bosse. L'endroit libre est cherché dans une capture de la barre (grim) qui reste sur cet ordinateur."
   },
   "Bulge": {
     "Bulge": "Bosse"
@@ -182,8 +182,8 @@
   "Feels the machine": {
     "Feels the machine": "Sent la machine"
   },
-  "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke. Checks every 2 s, practically 0.": {
-    "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke. Checks every 2 s, practically 0.": "Sous forte charge (CPU au-dessus d'environ 60 % pendant un moment, mémoire au-dessus de 82 % ou processeur chaud), il se met à transpirer ; sous très forte charge, il plisse les yeux. Quand un programme plante ou qu'un service tombe en panne, il se fâche et dit ce qui est cassé. Vérifie toutes les 2 s, pratiquement 0."
+  "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke; for that he follows the system journal and DMS's log. Checks every 2 s, practically 0.": {
+    "Under high load (CPU over about 60 % for a while, memory over 82 % or a hot processor) he starts to sweat, under very high load he squeezes his eyes shut. When a program crashes or a service fails he gets angry and says what broke; for that he follows the system journal and DMS's log. Checks every 2 s, practically 0.": "Sous forte charge (CPU au-dessus d'environ 60 % pendant un moment, mémoire au-dessus de 82 % ou processeur chaud), il se met à transpirer ; sous très forte charge, il plisse les yeux. Quand un programme plante ou qu'un service échoue, il se fâche et dit ce qui est cassé ; pour cela il suit le journal système et le journal de DMS. Vérifie toutes les 2 s, pratiquement 0."
   },
   "Dances to music": {
     "Dances to music": "Danse sur la musique"
@@ -194,8 +194,8 @@
   "Chat": {
     "Chat": "Chat"
   },
-  "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. 0 locally; each answer counts against the Claude quota.": {
-    "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. 0 locally; each answer counts against the Claude quota.": "Discutez via Claude dans une fenêtre à part ; il saute dedans. La session continue en arrière-plan, les réponses commencent donc après environ une seconde et arrivent mot par mot. 0 en local ; chaque réponse compte dans le quota Claude."
+  "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. What you write goes to Anthropic or the provider chosen below. A line starting with ! runs as a command in bash, like in a terminal. 0 locally; each answer counts against the Claude quota.": {
+    "Chat through Claude in its own window; he jumps into it. The session keeps running in the background, so answers start after about one second and arrive word by word. What you write goes to Anthropic or the provider chosen below. A line starting with ! runs as a command in bash, like in a terminal. 0 locally; each answer counts against the Claude quota.": "Discussion avec Claude dans sa propre fenêtre ; il saute dedans. La session continue en arrière-plan, les réponses commencent après environ une seconde et arrivent mot par mot. Ce que vous écrivez part chez Anthropic ou chez le fournisseur choisi plus bas. Une ligne qui commence par ! s'exécute comme commande dans bash, comme dans un terminal. 0 en local ; chaque réponse compte dans le quota Claude."
   },
   "Desktop help": {
     "Desktop help": "Aide pour le bureau"
@@ -307,5 +307,11 @@
   },
   "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": {
     "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.": "Dans le chat, il peut consulter des choses sur le bureau (fichiers, commandes en lecture seule comme niri msg et dms ipc get) et connaît le skill desktop. Les modifications, il ne fait que les proposer sous forme de carte ; rien ne s'exécute avant votre clic sur « Run ». Les droits root, le redémarrage de DMS ou de niri et les réinitialisations sont toujours bloqués. Ce qu'il lit est envoyé avec votre message au fournisseur du chat."
+  },
+  "Notices what happens": {
+    "Notices what happens": "Remarque ce qui se passe"
+  },
+  "He reacts when a download lands in ~/Downloads, a USB drive is plugged in, a program uses the microphone or records the screen, a long build or package run ends, or updates are waiting. For this he watches ~/Downloads, USB events and the audio streams, looks at the names of the running programs every 15 s and runs checkupdates every 3 hours. Nothing leaves the computer. Practically 0.": {
+    "He reacts when a download lands in ~/Downloads, a USB drive is plugged in, a program uses the microphone or records the screen, a long build or package run ends, or updates are waiting. For this he watches ~/Downloads, USB events and the audio streams, looks at the names of the running programs every 15 s and runs checkupdates every 3 hours. Nothing leaves the computer. Practically 0.": "Il réagit quand un téléchargement arrive dans ~/Downloads, qu'une clé USB est branchée, qu'un programme utilise le micro ou enregistre l'écran, qu'une longue compilation ou mise à jour de paquets se termine, ou que des mises à jour attendent. Pour cela il surveille ~/Downloads, les événements USB et les flux audio, regarde les noms des programmes en cours toutes les 15 s et lance checkupdates toutes les 3 heures. Rien ne quitte l'ordinateur. Pratiquement 0."
   }
 }
