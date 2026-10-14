@@ -162,11 +162,59 @@ def on_mains():
     return not any((d / "type").read_text().strip() == "Battery" for d in root.iterdir()) if root.exists() else True
 
 
-def read_settings():
+def dms_settings():
     try:
         return json.loads(PLUGIN_SETTINGS.read_text()).get("aibou", {})
     except (OSError, ValueError):
         return {}
+
+
+# What the chat changed (activity, figures more or fewer) stays in Aibou's own
+# state, {key: {"value", "base"}}, and lies over DMS's settings; DMS's file is
+# never written from here. The settings page takes these over into DMS when it
+# opens. A key whose DMS value is no longer "base" (taken over, or changed in
+# DMS) is dropped again.
+CHOSEN = STATE / "chosen.json"
+
+
+def read_chosen():
+    try:
+        data = json.loads(CHOSEN.read_text())
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def write_chosen(data):
+    STATE.mkdir(parents=True, exist_ok=True)
+    tmp = CHOSEN.with_name(CHOSEN.name + ".tmp")
+    tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False))
+    os.replace(tmp, CHOSEN)
+
+
+def read_settings():
+    """DMS's settings for Aibou with the chat's choices over them."""
+    dms = dms_settings()
+    chosen = read_chosen()
+    keep = {k: c for k, c in chosen.items() if isinstance(c, dict) and dms.get(k) == c.get("base")}
+    if keep != chosen:
+        write_chosen(keep)
+    return {**dms, **{k: c["value"] for k, c in keep.items()}}
+
+
+def choose(values):
+    """Changes from the chat into Aibou's own state, then on to the scene."""
+    global SETTINGS
+    dms = dms_settings()
+    chosen = read_chosen()
+    for k, v in values.items():
+        if dms.get(k) == v:
+            chosen.pop(k, None)
+        else:
+            chosen[k] = {"value": v, "base": dms.get(k)}
+    write_chosen(chosen)
+    SETTINGS = read_settings()
+    emit({"t": "settings", "values": {**SETTINGS, "userName": user_name()}})
 
 
 SESSION = HOME / ".local/state/DankMaterialShell/session.json"
@@ -196,32 +244,15 @@ SETTABLE = {"activity": ("minimal", "calm", "normal", "lively", "max")}
 
 
 def set_option(key, value):
-    """One Aibou setting into DMS's plugin_settings.json, like change_buddies."""
-    global SETTINGS
-    if value not in SETTABLE.get(key, ()):
-        return
-    try:
-        data = json.loads(PLUGIN_SETTINGS.read_text())
-    except (OSError, ValueError):
-        return
-    data.setdefault("aibou", {})[key] = value
-    tmp = PLUGIN_SETTINGS.with_name(PLUGIN_SETTINGS.name + ".aibou-tmp")
-    tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False))
-    os.replace(tmp, PLUGIN_SETTINGS)
-    SETTINGS = data["aibou"]
-    emit({"t": "settings", "values": {**SETTINGS, "userName": user_name()}})
+    """One Aibou setting changed from the chat."""
+    if value in SETTABLE.get(key, ()):
+        choose({key: value})
 
 
 def change_buddies(delta):
     """One figure more (in the first free place, a look not taken yet) or one
-    less (the last one). Written into DMS's plugin_settings.json, which DMS
-    reloads by itself, so its settings page shows it too."""
-    global SETTINGS
-    try:
-        data = json.loads(PLUGIN_SETTINGS.read_text())
-    except (OSError, ValueError):
-        return
-    m = data.setdefault("aibou", {})
+    less (the last one)."""
+    m = read_settings()
     slots = ["skin2", "skin3", "skin4", "skin5"]
     if delta > 0:
         free = [k for k in slots if m.get(k, "none") == "none"]
@@ -231,17 +262,12 @@ def change_buddies(delta):
         looks = [s for s in ("kuro", "mochi", "shiro", "momo", "robo", "bao", "neko", "kumo", "tako", "hiyoko", "arai") if s not in used]
         if not looks:
             return
-        m[free[0]] = random.choice(looks)
+        choose({free[0]: random.choice(looks)})
     else:
         taken = [k for k in slots if m.get(k, "none") != "none"]
         if not taken:
             return
-        m[taken[-1]] = "none"
-    tmp = PLUGIN_SETTINGS.with_name(PLUGIN_SETTINGS.name + ".aibou-tmp")
-    tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False))
-    os.replace(tmp, PLUGIN_SETTINGS)
-    SETTINGS = m
-    emit({"t": "settings", "values": {**SETTINGS, "userName": user_name()}})
+        choose({taken[-1]: "none"})
 
 
 def user_name():
@@ -260,7 +286,7 @@ def user_name():
 
 
 async def watch_settings():
-    """The DMS plugin writes plugin_settings.json; pass Aibou's part on when it changes."""
+    """DMS writes plugin_settings.json; pass Aibou's part on when it changes."""
     global SETTINGS
     last = None
     while True:

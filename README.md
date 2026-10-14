@@ -126,6 +126,9 @@ In the chat window you can type commands without a prefix: `jump`, `dance`, `kis
 `climb arai`, `happy 3`, `more`, `fewer`, `help`. Anything that is not a command goes to the AI.
 Left click a figure to tickle it, double click for the chat, drag to pick it up and throw it.
 
+What you change from the chat (`more`, `fewer`, the activity) is kept in
+`~/.local/state/aibou/chosen.json`; the settings page takes it over into DMS when you open it.
+
 ## What Aibou watches
 
 Everything below stays on the computer, apart from the chat.

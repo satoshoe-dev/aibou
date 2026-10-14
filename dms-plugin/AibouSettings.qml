@@ -21,6 +21,33 @@ PluginSettings {
     }
     pluginId: "aibou"
 
+    // What was changed in the chat (activity, figures more or fewer) Aibou keeps
+    // in its own state instead of writing DMS's file. Opening this page takes it
+    // over into DMS's settings, so the page and DMS show it too.
+    property var chosen: null
+    property FileView chosenFile: FileView {
+        path: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/aibou/chosen.json"
+        onLoaded: {
+            try {
+                root.chosen = JSON.parse(text());
+            } catch (e) {
+                root.chosen = null;
+            }
+            root.takeChosen();
+        }
+    }
+    onPluginServiceChanged: Qt.callLater(takeChosen)
+    function takeChosen() {
+        if (!root.chosen || !root.pluginService)
+            return;
+        const c = root.chosen;
+        root.chosen = null;
+        for (const k in c) {
+            if (c[k] && c[k].value !== undefined)
+                root.saveValue(k, c[k].value);
+        }
+    }
+
     readonly property var skinOptions: [
         { label: "Kuro", value: "kuro" },
         { label: "Mochi", value: "mochi" },
