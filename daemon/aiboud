@@ -39,6 +39,7 @@ stdin (from the scene):
   {"t":"frameBodies","list":[{screen,side,p,w,h,f}]}   domes for DMS to draw in its frame
 """
 import asyncio
+import fnmatch
 import hashlib
 import json
 import math
@@ -1629,25 +1630,44 @@ SKILL_DIR = Path(os.environ.get("AIBOU_SKILL_DIR", HOME / ".claude/skills/deskto
 SKILL = SKILL_DIR / "SKILL.md"
 
 
+# the desktop's own config folders; not all of ~/.config, where other
+# programs keep tokens and passwords
+CONFIG_DIRS = ("niri", "DankMaterialShell", "quickshell", "aibou", "matugen", "gtk-3.0", "gtk-4.0",
+               "kitty", "Kvantum", "qt5ct", "qt6ct", "fontconfig")
+# never read, wherever they lie (also in folders from "readDirs")
+SECRET_NAMES = ("*token*", "*secret*", "*password*", "*passwd*", "*credential*", "*.key", "*.pem",
+                ".env", ".env.*", "*.kdbx", "hosts.yml", "auth.json", "*.keyring")
+
+
 def read_dirs():
-    """Where the desktop help may read: the usual config places, this
-    repository, the skill, and the setting "readDirs" (more folders)."""
+    """Where the desktop help may read: the desktop's config folders, this
+    repository, the skill, DMS's cache, and the setting "readDirs" (more folders)."""
     extra = SETTINGS.get("readDirs") or []
     if isinstance(extra, str):
         extra = [x for x in extra.split(",")]
-    return [HOME / ".config", SKILL_DIR, HOME / ".local/bin", REPO, HOME / ".cache/DankMaterialShell"] + \
+    return [HOME / ".config" / d for d in CONFIG_DIRS] + [SKILL_DIR, REPO, HOME / ".cache/DankMaterialShell"] + \
         [Path(os.path.expanduser(str(x).strip())) for x in extra if str(x).strip()]
 
 
-# read-only commands the desktop help may run by itself (prefixes)
+def secret_name(path):
+    return any(fnmatch.fnmatch(part.lower(), pat) for part in Path(path).parts for pat in SECRET_NAMES)
+
+
+# read-only commands the desktop help may run by itself, exactly as written
 READ_COMMANDS = [
-    "niri msg -j", "niri validate", "niri --version",
-    "dms version", "dms doctor", "dms ipc --help", "dms keybinds show", "dms plugins list",
-    "dms ipc call settings get", "dms ipc call settings dump", "dms ipc call plugins list",
-    "dms ipc call plugins status", "dms ipc call bar status", "dms ipc call bar getPosition",
-    "dms ipc call theme getMode", "dms ipc call wallpaper get", "dms ipc call desktopWidget list",
+    "niri msg -j windows", "niri msg -j workspaces", "niri msg -j outputs", "niri msg -j layers",
+    "niri msg -j focused-window", "niri msg -j focused-output", "niri msg -j keyboard-layouts",
+    "niri msg -j version", "niri validate", "niri --version",
+    "dms version", "dms doctor", "dms ipc --help", "dms plugins list",
+    "dms ipc call settings dump", "dms ipc call plugins list", "dms ipc call plugins status",
+    "dms ipc call bar status", "dms ipc call bar getPosition", "dms ipc call theme getMode",
+    "dms ipc call wallpaper get", "dms ipc call desktopWidget list", "aibou status",
+]
+# ... and these with arguments after them (a key, a unit, a pattern)
+READ_PREFIXES = [
+    "dms keybinds show", "dms ipc call settings get",
     "systemctl --user status", "systemctl --user is-active", "systemctl --user list-units",
-    "journalctl --user -u", "journalctl --user -n", "aibou status", "fc-list",
+    "journalctl --user -u", "journalctl --user -n", "fc-list",
 ]
 # never, whatever is proposed
 BLOCKED = [
@@ -1660,7 +1680,8 @@ BLOCKED = [
     (r"\brm\s+-[a-z]*r|\brm\s+-[a-z]*f", "deletes recursively or without asking"),
     (r"/usr/(bin|share|local/bin)/|/run/user/\d+/danklinux|\.config/niri/dms/", "protected place"),
 ]
-# one's own additions: {"readCommands": ["mytool status", …], "blocked": [["regex", "why"], …]}
+# one's own additions: {"readCommands": ["mytool status", "mytool show *", …], "blocked": [["regex", "why"], …]}
+# (a command ending in " *" may take arguments, the others only exactly as written)
 DESKTOP_HELP_EXTRA = HOME / ".config/aibou/desktop-help.json"
 
 
@@ -1673,8 +1694,17 @@ def help_extra():
 
 
 def read_commands_allowed():
-    extra = [c for c in help_extra().get("readCommands") or [] if isinstance(c, str) and c.strip()]
-    return READ_COMMANDS + [c.strip() for c in extra]
+    """[(command, takes arguments)] for the desktop help."""
+    out = [(c, False) for c in READ_COMMANDS] + [(c, True) for c in READ_PREFIXES]
+    for c in help_extra().get("readCommands") or []:
+        if isinstance(c, str) and c.strip():
+            c = c.strip()
+            out.append((c[:-2].strip(), True) if c.endswith(" *") else (c, False))
+    return out
+
+
+def read_allowed(cmd):
+    return any(cmd == c or (args and cmd.startswith(c + " ")) for c, args in read_commands_allowed())
 
 
 def blocked_rules():
@@ -1878,9 +1908,14 @@ class Chat:
         self.key = key
         self.handover = bool(self.history)
         if desktop:
-            tools = ["--tools", "Read,Glob,Grep,Bash", "--permission-mode", "dontAsk",
-                     "--allowedTools", "Read", "Glob", "Grep", *[f"Bash({c}:*)" for c in read_commands_allowed()],
-                     "--add-dir", *[str(d) for d in read_dirs() if d.exists()]]
+            # no built-in tools: Claude Code lets read-only shell commands such
+            # as cat run by themselves in folders it may read, past any rule.
+            # It gets the same three tools as the other providers instead, from
+            # this file as an MCP server (`aiboud --mcp`), with the same checks.
+            mcp = {"mcpServers": {"aibou": {"command": sys.executable, "args": [str(Path(__file__).resolve()), "--mcp"]}}}
+            tools = ["--tools", "", "--mcp-config", json.dumps(mcp), "--strict-mcp-config",
+                     "--permission-mode", "dontAsk",
+                     "--allowedTools", *[f"mcp__aibou__{t['name']}" for t in API_TOOLS]]
         else:
             tools = ["--tools", ""]
         self.proc = await asyncio.create_subprocess_exec(
@@ -2111,7 +2146,7 @@ class Chat:
             elif kind == "assistant":
                 for block in (ev.get("message") or {}).get("content", []):
                     if block.get("type") == "tool_use":
-                        emit({"t": "tool", "name": block.get("name"), "what": tool_note(block)})
+                        emit({"t": "tool", "name": str(block.get("name")).split("__")[-1], "what": tool_note(block)})
             elif kind == "result":
                 if ev.get("is_error"):
                     raise RuntimeError(ev.get("result") or "error")
@@ -2246,7 +2281,7 @@ def api_stream(p, key, system, messages, on_piece, tools=None):
 
 # ── desktop help for the other providers: the same reading, as tools ──
 API_TOOLS = [
-    {"name": "read_file", "description": "Read a text file (only in the desktop folders: ~/.config, the desktop skill, ~/.local/bin, Aibou, DMS plugins).",
+    {"name": "read_file", "description": "Read a text file (only in the desktop folders: niri, DMS, Quickshell, GTK, Qt and kitty config, the desktop skill, Aibou, and folders the user added).",
      "parameters": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
     {"name": "list_dir", "description": "List a folder (same folders as read_file).",
      "parameters": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
@@ -2259,6 +2294,8 @@ def allowed_path(path):
     try:
         p = Path(os.path.expanduser(str(path))).resolve()
     except (OSError, RuntimeError):
+        return None
+    if secret_name(p):
         return None
     for d in read_dirs():
         try:
@@ -2274,7 +2311,7 @@ def run_tool(name, args):
     if name in ("read_file", "list_dir"):
         p = allowed_path(args.get("path", ""))
         if not p:
-            return "refused: only inside " + ", ".join(str(d).replace(str(HOME), "~") for d in read_dirs())
+            return "refused: no files named like secrets, and only inside " + ", ".join(str(d).replace(str(HOME), "~") for d in read_dirs())
         try:
             if name == "list_dir":
                 return "\n".join(sorted((e.name + ("/" if e.is_dir() else "")) for e in p.iterdir())[:300]) or "(empty)"
@@ -2286,7 +2323,7 @@ def run_tool(name, args):
         cmd = str(args.get("command", "")).strip()
         if re.search(r"[;&|`$<>\n]", cmd):
             return "refused: one plain command, no pipes, substitution or redirection"
-        if not any(cmd == c or cmd.startswith(c + " ") for c in read_commands_allowed()):
+        if not read_allowed(cmd):
             return "refused: not a read-only command from the allowed list"
         if blocked(cmd):
             return "refused: " + blocked(cmd)
@@ -2532,7 +2569,47 @@ async def main():
         *(while_on(key, default, f) for key, default, fs in GATED for f in fs))
 
 
+def mcp_server():
+    """`aiboud --mcp`: the desktop help's tools for the claude CLI, as a
+    minimal MCP server on stdin/stdout (JSON-RPC, one message per line)."""
+    global SETTINGS
+    def send(obj):
+        sys.stdout.write(json.dumps(obj, ensure_ascii=False) + "\n")
+        sys.stdout.flush()
+    for line in sys.stdin:
+        try:
+            msg = json.loads(line)
+        except ValueError:
+            continue
+        mid, method, params = msg.get("id"), msg.get("method"), msg.get("params") or {}
+        if mid is None:
+            continue                     # notifications need no answer
+        if method == "initialize":
+            send({"jsonrpc": "2.0", "id": mid, "result": {
+                "protocolVersion": params.get("protocolVersion", "2025-06-18"),
+                "capabilities": {"tools": {}}, "serverInfo": {"name": "aibou", "version": "1"}}})
+        elif method == "tools/list":
+            send({"jsonrpc": "2.0", "id": mid, "result": {"tools": [
+                {"name": t["name"], "description": t["description"], "inputSchema": t["parameters"]} for t in API_TOOLS]}})
+        elif method == "tools/call":
+            SETTINGS = read_settings()           # "readDirs" as it is now
+            name = params.get("name", "")
+            if name in [t["name"] for t in API_TOOLS]:
+                text = run_tool(name, params.get("arguments") or {})
+            else:
+                text = "refused: unknown tool"
+            send({"jsonrpc": "2.0", "id": mid, "result": {
+                "content": [{"type": "text", "text": text}], "isError": text.startswith(("refused", "error"))}})
+        elif method == "ping":
+            send({"jsonrpc": "2.0", "id": mid, "result": {}})
+        else:
+            send({"jsonrpc": "2.0", "id": mid, "error": {"code": -32601, "message": "unknown method"}})
+
+
 if __name__ == "__main__":
+    if len(sys.argv) == 2 and sys.argv[1] == "--mcp":
+        mcp_server()
+        sys.exit(0)
     if len(sys.argv) == 3 and sys.argv[1] == "--test-provider":
         sys.exit(test_provider(sys.argv[2]))
     try:

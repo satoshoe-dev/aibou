@@ -423,7 +423,7 @@ PluginSettings {
     ToggleSetting {
         settingKey: "desktopHelp"
         label: I18n.trFor("aibou", "Desktop help")
-        description: I18n.trFor("aibou", "In the chat he may look things up on the desktop (files, read-only commands like niri msg and dms ipc get) and knows the desktop skill. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.")
+        description: I18n.trFor("aibou", "In the chat he may look things up on the desktop (files, read-only commands like niri msg -j windows and dms ipc get) and knows the desktop skill. He reads only the desktop's config folders (niri, DMS, Quickshell, GTK, Qt, kitty) and folders you add; files named like tokens, passwords or keys are always refused. Changes he only proposes as a card; nothing runs until you click Run. Root rights, restarting DMS or niri and resets are always blocked. What he reads goes to the chat provider along with your message.")
         defaultValue: false
     }
 

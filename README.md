@@ -152,18 +152,24 @@ The chat sends your messages off the machine: to Anthropic through the `claude` 
 provider you set up on the settings page. A line that starts with `!` runs as a command in bash,
 the way it would in a terminal.
 
-"Desktop help" is off by default. Switched on, the chat may read your configuration (`~/.config`,
-`~/.local/bin`, this repository, DMS's cache and the folders under "readDirs") and run a list of
-read-only commands; what it reads goes to the chat provider along with your message. Changes come
-as cards with a button and nothing runs until you click it. A block list stops root rights and
+"Desktop help" is off by default. Switched on, the chat may read the desktop's config folders
+(niri, DankMaterialShell, quickshell, aibou, matugen, GTK, Qt, Kvantum, kitty, fontconfig under
+`~/.config`), this repository, DMS's cache and the folders under "readDirs", and run a list of
+read-only commands, each exactly as listed (a few take arguments, such as a unit for journalctl).
+Files named like tokens, passwords or keys are refused everywhere; still, do not add folders that
+hold secrets. What it reads goes to the chat provider along with your message. The model gets no
+shell and none of Claude Code's own tools: it reads through three tools that the daemon serves
+(`aiboud --mcp`), the same ones the other providers get. Changes come as cards with a button and
+nothing runs until you click it. A block list stops root rights and
 restarts of DMS or niri regardless of what the model says. If you keep a Claude Code skill about
 your desktop in `~/.claude/skills/desktop` (or set `AIBOU_SKILL_DIR`), it is read into the help.
 
-Your own read-only commands and block rules go into `~/.config/aibou/desktop-help.json`:
+Your own read-only commands and block rules go into `~/.config/aibou/desktop-help.json`. A
+command ending in ` *` may take arguments, the others run only exactly as written:
 
 ```json
 {
-  "readCommands": ["mytool status"],
+  "readCommands": ["mytool status", "mytool show *"],
   "blocked": [["\\bmytool\\s+reset\\b", "resets only by hand"]]
 }
 ```
