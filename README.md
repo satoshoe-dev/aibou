@@ -63,7 +63,9 @@ Portuguese, Russian and Chinese.
   `pactl` (microphone), `secret-tool` (API keys of other chat providers), `checkupdates` from
   pacman-contrib (updates on Arch)
 - For the chat: the [Claude Code](https://docs.claude.com/en/docs/claude-code) CLI (`claude`), or
-  an OpenAI-compatible or Anthropic API key set up on the settings page (kept with `secret-tool`)
+  an OpenAI-compatible or Anthropic API key set up on the settings page (kept with `secret-tool`).
+  Without Claude Code, pick your provider as "Chat model" on the settings page or with the bolt
+  button in the chat window; the choice is kept.
 
 ## Install
 

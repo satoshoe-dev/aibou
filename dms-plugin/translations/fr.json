@@ -203,8 +203,8 @@
   "Chat model": {
     "Chat model": "Modèle de chat"
   },
-  "Haiku answers fastest, Sonnet and Opus think deeper. Can also be switched in the chat window for the current conversation.": {
-    "Haiku answers fastest, Sonnet and Opus think deeper. Can also be switched in the chat window for the current conversation.": "Haiku répond le plus vite, Sonnet et Opus réfléchissent plus en profondeur. Se change aussi dans la fenêtre de chat pour la conversation en cours."
+  "Haiku answers fastest, Sonnet and Opus think deeper; all three need Claude Code (the claude command). The providers set up below can be chosen here too. Switching in the chat window changes this setting as well.": {
+    "Haiku answers fastest, Sonnet and Opus think deeper; all three need Claude Code (the claude command). The providers set up below can be chosen here too. Switching in the chat window changes this setting as well.": "Haiku répond le plus vite, Sonnet et Opus réfléchissent plus en profondeur ; les trois ont besoin de Claude Code (la commande claude). Les fournisseurs configurés plus bas peuvent aussi être choisis ici. Changer dans la fenêtre de discussion modifie aussi ce réglage."
   },
   "New provider": {
     "New provider": "Nouveau fournisseur"

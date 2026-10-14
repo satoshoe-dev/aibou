@@ -430,13 +430,14 @@ PluginSettings {
     SelectionSetting {
         settingKey: "model"
         label: I18n.trFor("aibou", "Chat model")
-        description: I18n.trFor("aibou", "Haiku answers fastest, Sonnet and Opus think deeper. Can also be switched in the chat window for the current conversation.")
+        description: I18n.trFor("aibou", "Haiku answers fastest, Sonnet and Opus think deeper; all three need Claude Code (the claude command). The providers set up below can be chosen here too. Switching in the chat window changes this setting as well.")
         defaultValue: "haiku"
+        // Claude Code's three models, then the providers set up below
         options: [
             { label: "Haiku", value: "haiku" },
             { label: "Sonnet", value: "sonnet" },
             { label: "Opus", value: "opus" }
-        ]
+        ].concat(prov.list.map(p => ({ label: p.name || p.id, value: "p:" + p.id })))
     }
 
     // ── other AI providers ───────────────────────────────────────

@@ -48,6 +48,7 @@ import os
 import pwd
 import random
 import re
+import shutil
 import statistics
 import subprocess
 import sys
@@ -1618,6 +1619,15 @@ RULES = {
           "(1 a little, 3 very). Example: [happy] Here I am. [blush3] Oh, thank you!",
 }
 MODELS = ("haiku", "sonnet", "opus")
+# Haiku, Sonnet and Opus need Claude Code; without it the chat says what to do
+NO_CLAUDE = {
+    "de": "Ich finde Claude Code nicht (den Befehl `claude`). Wähl oben mit dem Blitz einen anderen "
+          "Anbieter oder richte einen in den Einstellungen unter „Weitere KI-Anbieter“ ein.",
+    "en": "I can't find Claude Code (the `claude` command). Pick another provider with the bolt button "
+          "above, or set one up in the settings under \"Other AI providers\".",
+    "ja": "Claude Code (`claude` コマンド) が見つかりません。上の稲妻ボタンでほかのプロバイダーを選ぶか、"
+          "設定の「その他の AI プロバイダー」で設定してください。",
+}
 
 # ── desktop help ──────────────────────────────────────────────────
 # With `desktopHelp` on he may look around (files, read-only commands) and
@@ -1930,6 +1940,8 @@ class Chat:
 
     async def warm(self):
         """Start the session ahead of the first message (chat window opened)."""
+        if not provider(self.wanted()[0]) and not shutil.which("claude"):
+            return
         async with self.lock:
             try:
                 await self.ensure()
@@ -1937,9 +1949,12 @@ class Chat:
                 log("warm failed:", repr(e))
 
     async def set_model(self, name):
+        """A model or provider picked in the chat window; it stays the choice
+        (kept like the chat's other changes, see choose())."""
         if name not in MODELS and not provider(name):
             return
-        self.model_override = name
+        self.model_override = None
+        choose({"model": name})
         if not self.busy:
             await self.warm()
         else:
@@ -1960,6 +1975,9 @@ class Chat:
         emit({"t": "thinking"})
         try:
             p = provider(self.wanted()[0])
+            if not p and not shutil.which("claude"):
+                emit({"t": "say", "mood": "sad", "text": NO_CLAUDE.get(language(), NO_CLAUDE["en"])})
+                return
             if p:
                 result = await self.ask_api(p, text)
             else:
