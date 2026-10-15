@@ -69,6 +69,25 @@ Portuguese, Russian and Chinese.
 
 ## Install
 
+### From the DMS plugin registry
+
+`dms plugins install aibou` (or Settings → Plugins → Browse) clones the whole repository to
+`~/.config/DankMaterialShell/plugins/.repos/` and links only the tile. The figures themselves
+still need the helper and the service, linked from that clone:
+
+```sh
+repo=$(dirname "$(readlink -f ~/.config/DankMaterialShell/plugins/aibou)")
+ln -s "$repo/bin/aibou" ~/.local/bin/aibou
+systemctl --user link "$repo/systemd/aibou.service"
+systemctl --user enable --now aibou.service
+```
+
+Then add the layer rules below. `dms plugins update` updates the figures along with the tile.
+Run `aibou off` before `dms plugins uninstall aibou`: uninstalling deletes the clone, and the
+service would keep trying to start from it.
+
+### By hand
+
 Clone it anywhere, link the helper, the DMS plugin and the service:
 
 ```sh
