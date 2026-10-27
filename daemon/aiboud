@@ -1714,13 +1714,14 @@ READ_COMMANDS = [
     "niri msg -j focused-window", "niri msg -j focused-output", "niri msg -j keyboard-layouts",
     "niri msg -j version", "niri validate", "niri --version",
     "dms version", "dms doctor", "dms ipc --help", "dms plugins list",
-    "dms ipc call settings dump", "dms ipc call plugins list", "dms ipc call plugins status",
-    "dms ipc call bar status", "dms ipc call bar getPosition", "dms ipc call theme getMode",
+    "dms ipc call settings dump", "dms ipc call plugins list", "dms ipc call theme getMode",
     "dms ipc call wallpaper get", "dms ipc call desktopWidget list", "aibou status",
 ]
 # ... and these with arguments after them (a key, a unit, a pattern)
 READ_PREFIXES = [
     "dms keybinds show", "dms ipc call settings get",
+    # DMS 2.0 wants an argument: a plugin id, or a bar selector and value (index 0)
+    "dms ipc call plugins status", "dms ipc call bar status", "dms ipc call bar getPosition",
     "systemctl --user status", "systemctl --user is-active", "systemctl --user list-units",
     "journalctl --user -u", "journalctl --user -n", "fc-list",
 ]
