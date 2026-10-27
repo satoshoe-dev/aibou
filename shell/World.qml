@@ -245,14 +245,13 @@ Item {
     property var clothWin2: null         // the second window, when he lifts two
     property string clothMode: "lift"    // lift | curtain (two windows slide aside)
     property real clothPush: 0
-    property bool clothPrep: false       // stage shown, capture under way
+    property bool clothPrep: false       // stage shown, cloth about to move
     property bool clothActive: false
     property real clothLift: 0
     property real clothX: 0
     property var clothFor: null
     property bool clothUnder: true       // the character is behind the cloth
     property bool pusher: false          // the hand at the cloth's edge
-    property bool capturing: false       // hide the character while the screen is captured
     readonly property bool clothBusy: clothPrep || clothActive
     signal clothRequest(var who, bool up)
     signal clothDone(var who, bool up)

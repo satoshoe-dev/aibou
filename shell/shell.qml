@@ -460,8 +460,8 @@ ShellRoot {
 
     // ── the cloth ─────────────────────────────────────────────────
     // Coming to the front, he lifts the bottom of the screen like a cloth and
-    // steps out from under it; going back, the other way round. The cloth is a
-    // screen capture of the strip, bent by shaders/cloth.vert.
+    // steps out from under it; going back, the other way round. The window
+    // itself is never copied, see ClothPiece.
     property var clothWho: null
     property string clothForce: ""
     property bool clothUp: true
@@ -494,22 +494,14 @@ ShellRoot {
             world.clothX = who.x0
             world.clothFor = who
             world.clothPrep = true
-            // hide him for the capture either way: behind a see-through window he
-            // would end up in the picture and ride along on the cloth
-            world.capturing = true
-            clothCapture.start()
+            clothGo.start()
         }
     }
-    Timer {
-        id: clothCapture
-        interval: 60
-        onTriggered: { scv.captureFrame(); clothGo.start() }
-    }
+    // a frame for the stage to show before the cloth moves
     Timer {
         id: clothGo
-        interval: 110
+        interval: 16
         onTriggered: {
-            world.capturing = false
             world.clothLift = 0
             world.clothUnder = shell.clothUp
             world.pusher = true
@@ -586,7 +578,6 @@ ShellRoot {
         required property string where
         required property real floor
         readonly property bool on: c.active && c.blurBehind && c.place === where && c.sink < 0.95
-                                   && !(world.capturing && where === "stage")
         // 2 px inside his outline: the region reaches niri a frame late, so
         // while he moves a full-size one shows a light rim beside him
         readonly property real inset: 2
@@ -661,7 +652,6 @@ ShellRoot {
                     id: hl
                     required property var modelData
                     active: modelData.active && modelData.place === "home"
-                    visible: !(world.capturing && world.clothFor === modelData)
                     x: modelData.x0; y: home.floor
                     sourceComponent: Creature { st: hl.modelData }
                 }
@@ -1307,71 +1297,24 @@ ShellRoot {
         GlassSpot { id: sg3; c: c3; where: "stage"; floor: stage.floor }
         GlassSpot { id: sg4; c: c4; where: "stage"; floor: stage.floor }
 
-        // the screen as captured, source of the cloth
-        ScreencopyView {
-            id: scv
-            captureSource: shell.screen
-            live: false
-            width: world.areaW
-            height: world.areaH
-            y: -(world.areaH - stage.height)
-            opacity: 0
-        }
-
         Item {
             width: parent.width
             height: stage.floor
             clip: true
             Ball { world: world; z: 3; y: stage.floor; visible: world.ballAlpha > 0.01 && shell.ballPlace === "stage" }
-            // the space under the lifted cloth: the wallpaper, as if the window
-            // really were lifted off the desktop. Opaque: the real window is
-            // still there underneath and would show through twice. The cloth
-            // covers it everywhere except under the bulge.
-            Item {
-                id: clothGap
-                readonly property var rightWin: world.clothWin2 || world.clothWin
-                readonly property bool curtain: world.clothMode === "curtain"
-                visible: world.clothActive
-                z: 0
-                opacity: 1
-                // out to the focus ring beside the window too (it lies outside its
-                // edge), or at a corner its upright stroke stays standing
-                x: curtain ? world.clothX - world.clothPush - 4 : Math.max(world.clothWin.x - stage.ringMargin, world.clothX - 150)
-                width: curtain ? world.clothPush * 2 + 8 : Math.min(rightWin.x + rightWin.w + stage.ringMargin, world.clothX + 150) - x
-                y: stage.clothBottom - height
-                height: curtain ? (world.clothFor ? world.clothFor.size * 1.8 : 100) : world.clothLift + 40
-                clip: true
-                // without a wallpaper: dark, lighter towards the frame
-                Rectangle {
-                    anchors.fill: parent
-                    visible: wall.status !== Image.Ready
-                    gradient: Gradient {
-                        GradientStop { position: 0; color: Qt.rgba(0.02, 0.018, 0.016, 1) }
-                        GradientStop { position: 1; color: Qt.rgba(world.glassTint.r * 0.7, world.glassTint.g * 0.7, world.glassTint.b * 0.7, 1) }
-                    }
-                }
-                // the wallpaper at its place on the screen (DMS fills the screen with it)
-                Image {
-                    id: wall
-                    source: world.wallpaper !== "" ? "file://" + world.wallpaper : ""
-                    asynchronous: true
-                    cache: true
-                    sourceSize: Qt.size(world.areaW, world.areaH)
-                    fillMode: Image.PreserveAspectCrop
-                    x: -clothGap.x
-                    y: -clothGap.y - (world.areaH - stage.height)
-                    width: world.areaW
-                    height: world.areaH
-                }
-                // the lifted edge casts a soft shadow onto it
-                Rectangle {
-                    width: parent.width
-                    height: Math.min(parent.height, 46)
-                    gradient: Gradient {
-                        GradientStop { position: 0; color: Qt.rgba(0, 0, 0, 0.55) }
-                        GradientStop { position: 1; color: Qt.rgba(0, 0, 0, 0) }
-                    }
-                }
+            // the wallpaper at its place on the screen (DMS fills the screen with
+            // it), shown in the opening under a lifted window
+            Image {
+                id: clothWall
+                source: world.wallpaper !== "" ? "file://" + world.wallpaper : ""
+                asynchronous: true
+                cache: true
+                sourceSize: Qt.size(world.areaW, world.areaH)
+                fillMode: Image.PreserveAspectCrop
+                y: -(world.areaH - stage.height)
+                width: world.areaW
+                height: world.areaH
+                // drawn only through the cloth pieces (hideSource)
             }
             Repeater {
                 model: world.cast
@@ -1380,7 +1323,6 @@ ShellRoot {
                     required property var modelData
                     active: modelData.active && modelData.place === "stage"
                     z: world.clothActive && world.clothFor === modelData && world.clothUnder ? 0.5 : 2
-                    visible: !(world.capturing && world.clothFor === modelData)
                     x: modelData.x0; y: stage.floor
                     sourceComponent: Creature { st: sl.modelData }
                 }
@@ -1395,17 +1337,10 @@ ShellRoot {
         }
         // niri draws the focus ring just outside the window: the cloth takes it along
         readonly property real ringMargin: 3
-        readonly property real clothBottom: world.clothWin.bottom + ringMargin - (world.areaH - stage.height)
-        // The cloth is a still picture: whatever runs underneath stands still
-        // while it is shown (issue #1). So it covers only the band that bends
-        // (cloth.vert), not the window's whole lower part. false: as before.
-        readonly property bool clothBand: true
-        // half width: the bulge falls off as exp(-dx²/95²), at 3.5·95 it moves
-        // a vertex by less than 1e-3 px
-        readonly property real clothBandHalf: 3.5 * 95
-        // height: the lift reaches lift·2.4 + 30 up, lift at most size·1.5 plus
-        // the OutBack overshoot (~10 %, 25 % taken); the curtain 260; 24 extra
-        readonly property real clothBandHeight: Math.max((world.clothFor ? world.clothFor.size : 60) * 1.5 * 1.25 * 2.4 + 30, 260) + 24
+        // A lifted window is not copied: the window stays where it is and keeps
+        // running (a still copy froze whatever ran underneath, issue #1). Drawn
+        // are only the opening under the lifted edge and the edge itself
+        // (shaders/flap.frag); the rest of the piece is transparent.
         component ClothPiece: Item {
             id: cp
             property var win: null           // { x, w, bottom }
@@ -1413,38 +1348,41 @@ ShellRoot {
             readonly property real bottomLocal: win ? win.bottom - (world.areaH - stage.height) : 0
             visible: world.clothActive && win !== null
             ShaderEffect {
-                // only the window's lower part, ending with its focus ring: the gap
-                // to the frame and whatever sits in it stay where they are
-                id: clothFx
+                // the window's lower part, out to its focus ring; between two
+                // windows each piece its own window
+                id: flap
                 visible: cp.win !== null
                 readonly property real m: stage.ringMargin
-                // cut to the band around the hand (stage.clothBand), inside the
-                // window and its ring; between two windows each piece its half.
-                // Whole pixels, so the picture is not resampled.
-                readonly property real winX0: cp.win ? cp.win.x - m : 0
-                readonly property real winX1: cp.win ? cp.win.x + cp.win.w + m : 1
-                readonly property real bandX0: stage.clothBand ? Math.max(winX0, Math.min(winX1 - 1, Math.floor(world.clothX - stage.clothBandHalf))) : winX0
-                readonly property real bandX1: stage.clothBand ? Math.max(bandX0 + 1, Math.min(winX1, Math.ceil(world.clothX + stage.clothBandHalf))) : winX1
-                readonly property real bandBottom: cp.bottomLocal + m
-                readonly property real bandTop: stage.clothBand ? Math.max(0, Math.floor(bandBottom - stage.clothBandHeight)) : 0
-                x: bandX0
-                y: bandTop
-                width: bandX1 - bandX0
-                height: Math.max(1, bandBottom - bandTop)
-                mesh: GridMesh { resolution: Qt.size(Math.max(16, Math.round(clothFx.width / 20)), 24) }
-                property variant src: ShaderEffectSource {
-                    sourceItem: scv
-                    sourceRect: cp.win ? Qt.rect(clothFx.bandX0, world.areaH - stage.height + clothFx.bandTop, clothFx.width, clothFx.height) : Qt.rect(0, 0, 1, 1)
+                readonly property real winX0: cp.win ? Math.floor(cp.win.x - m) : 0
+                readonly property real winX1: cp.win ? Math.ceil(cp.win.x + cp.win.w + m) : 1
+                readonly property real bottomY: Math.ceil(cp.bottomLocal + m)
+                // the curtain reaches 260 px up, the lift less
+                readonly property real topY: Math.max(0, bottomY - 300)
+                x: winX0
+                y: topY
+                width: Math.max(1, winX1 - winX0)
+                height: Math.max(1, bottomY - topY)
+                property variant wall: ShaderEffectSource {
+                    sourceItem: clothWall
                     hideSource: true
+                    sourceRect: Qt.rect(flap.x, flap.y + world.areaH - stage.height, flap.width, flap.height)
                 }
+                property real w: width
+                property real h: height
                 property real lift: world.clothLift
-                property real cx: world.clothX - bandX0
+                property real cx: world.clothX - x
                 property real spread: 95
                 // the bottom edge, in the item's own coordinates
                 property real edge: height
                 property real push: cp.hand * world.clothPush
-                vertexShader: "shaders/cloth.vert.qsb"
-                fragmentShader: "shaders/cloth.frag.qsb"
+                // curtain: the side that slides, the one towards him
+                property real side: cp.hand < 0 ? width : 0
+                property real fabricW: 14
+                property real hasWall: clothWall.status === Image.Ready ? 1 : 0
+                property color fabric: world.glassTint
+                property color gapTop: Qt.rgba(0.02, 0.018, 0.016, 1)
+                property color gapBottom: Qt.rgba(world.glassTint.r * 0.7, world.glassTint.g * 0.7, world.glassTint.b * 0.7, 1)
+                fragmentShader: "shaders/flap.frag.qsb"
             }
             // the hand at the cloth's edge, drawn over it so it reads clearly
             // against the dark gap
