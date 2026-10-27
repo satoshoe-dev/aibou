@@ -87,9 +87,31 @@ PanelWindow {
     }
 
     // ── icons from the DMS font, plain glyphs if it is missing ────
+    // DMS ships it in its common module: DCommon since 2.0, DankCommon in 1.6.
+    // The UI is unpacked under /run (a folder named by a hash) or, with a
+    // patched copy, under ~/.config/quickshell/dms-custom; tried in turn.
+    readonly property string fontFile: "assets/fonts/material-design-icons/variablefont/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf"
+    property var fontPlaces: [Quickshell.env("HOME") + "/.config/quickshell/dms-custom/DCommon",
+                              Quickshell.env("HOME") + "/.config/quickshell/dms-custom/DankCommon"]
+    property int fontTry: 0
+    // the places under /run come in later: go on if all before had failed
+    onFontPlacesChanged: if (symbols.status === FontLoader.Error && fontTry < fontPlaces.length - 1) fontTry++
+    Process {
+        // the folders DMS unpacked to, for both names
+        running: true
+        command: ["sh", "-c", "ls -d \"${XDG_RUNTIME_DIR:-/run/user/$(id -u)}\"/dms-shell/*/DCommon \"${XDG_RUNTIME_DIR:-/run/user/$(id -u)}\"/danklinux-shell/*/DankCommon 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const found = text.split("\n").filter(l => l !== "")
+                if (found.length > 0)
+                    win.fontPlaces = win.fontPlaces.concat(found)
+            }
+        }
+    }
     FontLoader {
         id: symbols
-        source: "file://" + Quickshell.env("HOME") + "/.config/quickshell/dms-custom/DankCommon/assets/fonts/material-design-icons/variablefont/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf"
+        source: win.fontTry < win.fontPlaces.length ? "file://" + win.fontPlaces[win.fontTry] + "/" + win.fontFile : ""
+        onStatusChanged: if (status === FontLoader.Error && win.fontTry < win.fontPlaces.length - 1) win.fontTry++
     }
     readonly property bool haveSymbols: symbols.status === FontLoader.Ready
     component Glyph: Text {

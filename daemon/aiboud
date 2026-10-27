@@ -59,9 +59,24 @@ from collections import deque
 from pathlib import Path
 
 HOME = Path.home()
-DMS_SETTINGS = HOME / ".config/DankMaterialShell/settings.json"
-DMS_COLORS = HOME / ".cache/DankMaterialShell/dms-colors.json"
-PLUGIN_SETTINGS = HOME / ".config/DankMaterialShell/plugin_settings.json"
+
+
+def dms_dir(base):
+    """DMS 2.0 keeps its files under "dms", 1.6 under "DankMaterialShell". After
+    the move the old name is a link to the new one; a fresh 2.0 install has only
+    the new one."""
+    old = base / "DankMaterialShell"
+    if old.is_dir() and not old.is_symlink():
+        return old
+    return base / "dms"
+
+
+DMS_CONFIG = dms_dir(Path(os.environ.get("XDG_CONFIG_HOME") or HOME / ".config"))
+DMS_CACHE = dms_dir(Path(os.environ.get("XDG_CACHE_HOME") or HOME / ".cache"))
+DMS_STATE = dms_dir(Path(os.environ.get("XDG_STATE_HOME") or HOME / ".local/state"))
+DMS_SETTINGS = DMS_CONFIG / "settings.json"
+DMS_COLORS = DMS_CACHE / "dms-colors.json"
+PLUGIN_SETTINGS = DMS_CONFIG / "plugin_settings.json"
 SETTINGS = {}
 STATE = Path(os.environ.get("XDG_STATE_HOME", HOME / ".local/state")) / "aibou"
 MOODS = ("happy", "proud", "curious", "sleepy", "shy", "surprised", "sad", "smug", "neutral",
@@ -80,8 +95,7 @@ def log(*args):
 def language():
     if os.environ.get("DMS_SPRACHE"):
         return os.environ["DMS_SPRACHE"][:2]
-    for p in (HOME / ".local/state/DankMaterialShell/session.json",
-              HOME / ".config/DankMaterialShell/session.json"):
+    for p in (DMS_STATE / "session.json", DMS_CONFIG / "session.json"):
         try:
             loc = json.loads(p.read_text()).get("locale")
             if loc:
@@ -129,22 +143,53 @@ def niri_gap():
     return gap
 
 
+def unit(v, default=1.0):
+    """An opacity as 0..1; DMS 2.0 also takes percent (Util.percentToUnit)."""
+    try:
+        v = float(v)
+    except (TypeError, ValueError):
+        return default
+    return v / 100 if v > 1 else v
+
+
+def frame_look(s, c):
+    """Opacity and colour of the screen frame, as DMS draws it. DMS leaves out
+    values at their default, so a missing key means the default."""
+    if int(s.get("configVersion") or 0) < 28:
+        # DMS 1.6: own keys (SettingsData.effectiveFrameColor)
+        fc = s.get("frameColor", "")
+        frame = {"": c["surface_container"], "default": c["surface_container"],
+                 "primary": c["primary"], "surface": c["surface"]}.get(fc, fc)
+        return unit(s.get("frameOpacity", 1.0)), frame
+    # DMS 2.0: the frame takes surface and opacity of the first bar that is
+    # neither an island nor dots (SettingsData.frameSurfaceBase/-Opacity)
+    bar = next((b for b in s.get("barConfigs") or []
+                if b.get("enabled") is not False and b.get("island") is not True
+                and b.get("dot") is not True), None) or {}
+    popup = unit(s.get("popupTransparency", 1.0))
+    glass = popup if bar.get("followInterfaceStyle") is not False else unit(bar.get("transparency", 1.0))
+    role, custom = bar.get("surfaceColor") or "default", bar.get("surfaceCustomColor", "")
+    if role == "default":
+        # Theme.hostSurface
+        role, custom = s.get("hostSurfaceColor") or "default", s.get("hostSurfaceCustomColor", "#6750A4")
+    if role == "default":
+        frame = c["surface"]
+    elif role == "custom":
+        frame = custom or c["surface"]
+    else:
+        # Theme.roleColor: surfaceContainer -> surface_container
+        frame = c.get(re.sub(r"([A-Z])", r"_\1", role).lower(), c["surface"])
+    return glass, frame
+
+
 def colors():
     try:
         d = json.loads(DMS_COLORS.read_text())
         c = d["colors"][d.get("mode", "dark")]
         try:
-            # DMS leaves out values at their default (1.0 for frameOpacity)
-            glass = float(json.loads(DMS_SETTINGS.read_text()).get("frameOpacity", 1.0))
+            glass, frame = frame_look(json.loads(DMS_SETTINGS.read_text()), c)
         except (OSError, ValueError, TypeError):
-            glass = 0.65
-        try:
-            fc = json.loads(DMS_SETTINGS.read_text()).get("frameColor", "")
-        except (OSError, ValueError):
-            fc = ""
-        # as DMS resolves it (SettingsData.effectiveFrameColor)
-        frame = {"": c["surface_container"], "default": c["surface_container"],
-                 "primary": c["primary"], "surface": c["surface"]}.get(fc, fc)
+            glass, frame = 0.65, c["surface_container"]
         return {"primary": c["primary"], "surface": c["surface_container_high"],
                 "base": c["surface"], "glass": glass, "frame": frame,
                 "text": c["on_surface"], "outline": c["outline"], "dark": d.get("mode") != "light"}
@@ -219,7 +264,7 @@ def choose(values):
     emit({"t": "settings", "values": {**SETTINGS, "userName": user_name()}})
 
 
-SESSION = HOME / ".local/state/DankMaterialShell/session.json"
+SESSION = DMS_STATE / "session.json"
 
 
 def do_not_disturb():
@@ -729,7 +774,7 @@ async def kuro_wall():
     sent = None
     # DMS writes these when the wallpaper or the mode changes: asked only then,
     # and once a minute in case
-    marks = [HOME / ".local/state/DankMaterialShell/session.json", HOME / ".cache/DankMaterialShell/dms-colors.json"]
+    marks = [DMS_STATE / "session.json", DMS_COLORS]
     def stamp():
         out = []
         for m in marks:
@@ -1642,7 +1687,7 @@ SKILL = SKILL_DIR / "SKILL.md"
 
 # the desktop's own config folders; not all of ~/.config, where other
 # programs keep tokens and passwords
-CONFIG_DIRS = ("niri", "DankMaterialShell", "quickshell", "aibou", "matugen", "gtk-3.0", "gtk-4.0",
+CONFIG_DIRS = ("niri", "DankMaterialShell", "dms", "quickshell", "aibou", "matugen", "gtk-3.0", "gtk-4.0",
                "kitty", "Kvantum", "qt5ct", "qt6ct", "fontconfig")
 # never read, wherever they lie (also in folders from "readDirs")
 SECRET_NAMES = ("*token*", "*secret*", "*password*", "*passwd*", "*credential*", "*.key", "*.pem",
@@ -1655,7 +1700,7 @@ def read_dirs():
     extra = SETTINGS.get("readDirs") or []
     if isinstance(extra, str):
         extra = [x for x in extra.split(",")]
-    return [HOME / ".config" / d for d in CONFIG_DIRS] + [SKILL_DIR, REPO, HOME / ".cache/DankMaterialShell"] + \
+    return [HOME / ".config" / d for d in CONFIG_DIRS] + [SKILL_DIR, REPO, DMS_CACHE] + \
         [Path(os.path.expanduser(str(x).strip())) for x in extra if str(x).strip()]
 
 

@@ -3228,7 +3228,8 @@ Item {
             }
             if (to > 0 || st.dockShift > 0) {
                 if (to > 0 && st.dockShift <= 0 && !st.held) surprised()
-                st.shiftDock(Math.max(0, to))
+                // closing: the popout is gone, the last duration stays
+                st.shiftDock(Math.max(0, to), p ? p.ms : -1)
             }
             return
         }

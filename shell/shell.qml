@@ -445,8 +445,9 @@ ShellRoot {
     }
     function setPopout(state) {
         const f = state.split(" ")
+        // ms: how long DMS folds it out (DMS 2.0 plugin); 0 from the 1.6 patch
         world.popout = f.length >= 5 && f[0] !== "zu"
-            ? { side: f[0], x: +f[1], y: +f[2], w: +f[3], h: +f[4], screen: f[5] || "" } : null
+            ? { side: f[0], x: +f[1], y: +f[2], w: +f[3], h: +f[4], screen: f[5] || "", ms: +f[6] || 0 } : null
     }
 
     // the ball lives where the first player is

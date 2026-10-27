@@ -32,8 +32,11 @@ Item {
         return true;
     }
 
-    // "side x y w h screen" (screen coordinates, like the patch), or "zu".
-    // Reading the descriptors also follows their motion while they animate.
+    // "side x y w h screen ms" (screen coordinates, like the patch), or "zu".
+    // ms is how long DMS takes to fold the surface out, so Aibou moves with it.
+    // The report comes as the surface starts to open, the patch under 1.6 sent
+    // it earlier and no ms. Reading the descriptors also follows their motion
+    // while they animate.
     readonly property string stand: {
         if (!root.active)
             return "zu";
@@ -45,7 +48,8 @@ Item {
                     if (!root.isOpen(d))
                         continue;
                     const r = d.bodyRect;
-                    return [d.barSide, Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height), screen].join(" ");
+                    const ms = kind === "modal" ? Theme.modalAnimationDuration : Theme.popoutAnimationDuration;
+                    return [d.barSide, Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height), screen, ms].join(" ");
                 }
             }
         }

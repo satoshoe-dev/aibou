@@ -1611,21 +1611,27 @@ Item {
     property real dockShift: 0           // px from the bar's edge outwards
     property real shiftTo: 0
     readonly property bool shifting: shiftAnim.running
+    // DMS 2.0 tells how long the popout takes (ms), and the report comes as it
+    // starts: then he moves with it, in the same time. 0: the 1.6 patch.
+    property int shiftMs: 0
     SequentialAnimation {
         id: shiftAnim
         // quick, to keep up with the popout as it folds out (DMS moves his
         // dome with it; his face follows)
-        // out: DMS tells before the popout shows (its surface maps a little
-        // later), so he waits for it; back in: it is already folding away
-        PauseAnimation { duration: st.shiftTo > st.dockShift && st.dockShift < 1 ? 160 : 0 }
-        NumberAnimation { target: st; property: "dockShift"; to: st.shiftTo; duration: st.shiftTo < st.dockShift ? 130 : 200; easing.type: Easing.OutCubic }
+        // out: the 1.6 patch tells before the popout shows (its surface maps a
+        // little later), so he waits for it; back in: it is already folding away
+        // under 2.0 the report comes as DMS starts, its surface shows about
+        // a frame later
+        PauseAnimation { duration: st.shiftTo > st.dockShift && st.dockShift < 1 ? (st.shiftMs > 0 ? 50 : 160) : 0 }
+        NumberAnimation { target: st; property: "dockShift"; to: st.shiftTo; duration: st.shiftMs > 0 ? st.shiftMs : st.shiftTo < st.dockShift ? 130 : 200; easing.type: Easing.OutCubic }
     }
     // where DMS shows his dome while a popout covers his place (screen px)
     property real cornerX: 0
     property real cornerY: 0
     property bool cornerMode: false      // on the corner (else at the popout's edge)
     property real shiftMax: 0            // how far the last push went
-    function shiftDock(to) {
+    function shiftDock(to, ms) {
+        if (ms !== undefined && ms >= 0) shiftMs = ms
         if (to > 0) shiftMax = to
         if (Math.abs(to - dockShift) < 1) return
         shiftTo = to
