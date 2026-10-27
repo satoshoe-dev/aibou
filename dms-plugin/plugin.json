@@ -5,11 +5,15 @@
     "version": "1.0.0",
     "author": "satoshoe",
     "license": "MIT",
-    "type": "widget",
+    "type": "composite",
     "capabilities": [
-        "control-center"
+        "control-center",
+        "daemon"
     ],
-    "component": "./AibouWidget.qml",
+    "components": {
+        "widget": "./AibouWidget.qml",
+        "daemon": "./AibouSurfaces.qml"
+    },
     "settings": "./AibouSettings.qml",
     "icon": "mood",
     "requires_dms": ">=1.6.1",

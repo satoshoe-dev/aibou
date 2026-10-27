@@ -1396,6 +1396,16 @@ ShellRoot {
         // niri draws the focus ring just outside the window: the cloth takes it along
         readonly property real ringMargin: 3
         readonly property real clothBottom: world.clothWin.bottom + ringMargin - (world.areaH - stage.height)
+        // The cloth is a still picture: whatever runs underneath stands still
+        // while it is shown (issue #1). So it covers only the band that bends
+        // (cloth.vert), not the window's whole lower part. false: as before.
+        readonly property bool clothBand: true
+        // half width: the bulge falls off as exp(-dx²/95²), at 3.5·95 it moves
+        // a vertex by less than 1e-3 px
+        readonly property real clothBandHalf: 3.5 * 95
+        // height: the lift reaches lift·2.4 + 30 up, lift at most size·1.5 plus
+        // the OutBack overshoot (~10 %, 25 % taken); the curtain 260; 24 extra
+        readonly property real clothBandHeight: Math.max((world.clothFor ? world.clothFor.size : 60) * 1.5 * 1.25 * 2.4 + 30, 260) + 24
         component ClothPiece: Item {
             id: cp
             property var win: null           // { x, w, bottom }
@@ -1405,21 +1415,33 @@ ShellRoot {
             ShaderEffect {
                 // only the window's lower part, ending with its focus ring: the gap
                 // to the frame and whatever sits in it stay where they are
+                id: clothFx
                 visible: cp.win !== null
                 readonly property real m: stage.ringMargin
-                x: cp.win ? cp.win.x - m : 0
-                width: cp.win ? cp.win.w + 2 * m : 1
-                height: cp.bottomLocal + m
-                mesh: GridMesh { resolution: Qt.size(Math.max(16, Math.round((cp.win ? cp.win.w : 320) / 20)), 24) }
+                // cut to the band around the hand (stage.clothBand), inside the
+                // window and its ring; between two windows each piece its half.
+                // Whole pixels, so the picture is not resampled.
+                readonly property real winX0: cp.win ? cp.win.x - m : 0
+                readonly property real winX1: cp.win ? cp.win.x + cp.win.w + m : 1
+                readonly property real bandX0: stage.clothBand ? Math.max(winX0, Math.min(winX1 - 1, Math.floor(world.clothX - stage.clothBandHalf))) : winX0
+                readonly property real bandX1: stage.clothBand ? Math.max(bandX0 + 1, Math.min(winX1, Math.ceil(world.clothX + stage.clothBandHalf))) : winX1
+                readonly property real bandBottom: cp.bottomLocal + m
+                readonly property real bandTop: stage.clothBand ? Math.max(0, Math.floor(bandBottom - stage.clothBandHeight)) : 0
+                x: bandX0
+                y: bandTop
+                width: bandX1 - bandX0
+                height: Math.max(1, bandBottom - bandTop)
+                mesh: GridMesh { resolution: Qt.size(Math.max(16, Math.round(clothFx.width / 20)), 24) }
                 property variant src: ShaderEffectSource {
                     sourceItem: scv
-                    sourceRect: cp.win ? Qt.rect(cp.win.x - stage.ringMargin, world.areaH - stage.height, cp.win.w + 2 * stage.ringMargin, cp.bottomLocal + stage.ringMargin) : Qt.rect(0, 0, 1, 1)
+                    sourceRect: cp.win ? Qt.rect(clothFx.bandX0, world.areaH - stage.height + clothFx.bandTop, clothFx.width, clothFx.height) : Qt.rect(0, 0, 1, 1)
                     hideSource: true
                 }
                 property real lift: world.clothLift
-                property real cx: world.clothX - (cp.win ? cp.win.x - m : 0)
+                property real cx: world.clothX - bandX0
                 property real spread: 95
-                property real edge: cp.bottomLocal + m
+                // the bottom edge, in the item's own coordinates
+                property real edge: height
                 property real push: cp.hand * world.clothPush
                 vertexShader: "shaders/cloth.vert.qsb"
                 fragmentShader: "shaders/cloth.frag.qsb"
