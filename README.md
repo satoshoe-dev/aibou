@@ -55,7 +55,7 @@ Portuguese, Russian and Chinese.
 
 ## Requirements
 
-- niri and DankMaterialShell 1.6.1 or newer, with the connected frame
+- niri and DankMaterialShell 1.6.1 or newer (tested with 1.6.2 and 2.0.0), with the connected frame
 - Quickshell 0.3 (the one DMS runs on), Qt 6
 - Python 3
 - For some features: `playerctl` and `cava` (dancing), `grim` (finding a free spot in the bar),
